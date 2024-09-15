@@ -1,21 +1,85 @@
-.gradle
-**/build/
-!src/**/build/
+# Gradle specific
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# Java specific
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.log
+*.log.*
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.log
+*.log.*
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
-!gradle-wrapper.properties
-
-# Cache of project
-.gradletasknamecache
-
-# Eclipse Gradle plugin generated files
-# Eclipse Core
-.project
-# JDT-specific (Eclipse Java Development Tools)
+# Eclipse
 .classpath
+.project
+.settings/
+.metadata/
+*.tmp
+*.swp
+*.swo
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+*.class
+
+# NetBeans
+nbproject/
+build/
+nbbuild/
+nbdist/
+nbactions.xml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Spring Boot specific
+spring.log
+spring-boot-loader/
+
+# Environment files
+.env
+
+# Logs
+*.log
+*.log.*
+
+# OS-specific files
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle wrapper
+gradle/wrapper/gradle-wrapper.jar
+
+# Configuration files
+*.properties
+*.yml
+*.yaml
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
