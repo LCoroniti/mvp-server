@@ -10,21 +10,19 @@ import java.util.List;
 public class Match {
     @Id
     private String id;
-    private String homeTeam;
-    private String awayTeam;
+    private String homeTeamId;
+    private String awayTeamId;
     private LocalDateTime matchDate;
     private List<Player> players;
     private List<Vote> votes;
-    private String leagueId;
 
-    public Match(String id, String homeTeam, String awayTeam, LocalDateTime matchDate, List<Player> players, List<Vote> votes, String leagueId) {
+    public Match(String id, String homeTeam, String awayTeam, LocalDateTime matchDate, List<Player> players, List<Vote> votes) {
         this.id = id;
-        this.homeTeam = homeTeam;
-        this.awayTeam = awayTeam;
+        this.homeTeamId = homeTeam;
+        this.awayTeamId = awayTeam;
         this.matchDate = matchDate;
         this.players = players;
         this.votes = votes;
-        this.leagueId = leagueId;
     }
 
     public Match() {
@@ -38,20 +36,20 @@ public class Match {
         this.id = id;
     }
 
-    public String getHomeTeam() {
-        return homeTeam;
+    public String getHomeTeamId() {
+        return homeTeamId;
     }
 
-    public void setHomeTeam(String homeTeam) {
-        this.homeTeam = homeTeam;
+    public void setHomeTeamId(String homeTeamId) {
+        this.homeTeamId = homeTeamId;
     }
 
-    public String getAwayTeam() {
-        return awayTeam;
+    public String getAwayTeamId() {
+        return awayTeamId;
     }
 
-    public void setAwayTeam(String awayTeam) {
-        this.awayTeam = awayTeam;
+    public void setAwayTeamId(String awayTeamId) {
+        this.awayTeamId = awayTeamId;
     }
 
     public LocalDateTime getMatchDate() {
@@ -76,13 +74,5 @@ public class Match {
 
     public void setVotes(List<Vote> votes) {
         this.votes = votes;
-    }
-
-    public String getLeagueId() {
-        return leagueId;
-    }
-
-    public void setLeagueId(String leagueId) {
-        this.leagueId = leagueId;
     }
 }

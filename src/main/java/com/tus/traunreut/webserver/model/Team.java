@@ -8,12 +8,12 @@ public class Team {
     @Id
     private String id;
     private String name;
-    private String leagueId;
+    private String clubId;
 
-    public Team(String id, String name, String leagueId) {
+    public Team(String id, String name, String clubId) {
         this.id = id;
         this.name = name;
-        this.leagueId = leagueId;
+        this.clubId = clubId;
     }
 
     public Team() {
@@ -35,12 +35,11 @@ public class Team {
         this.name = name;
     }
 
-    public String getLeagueId() {
-        return leagueId;
+    public String getClubId() {
+        return clubId;
     }
 
-    public void setLeagueId(String leagueId)
-    {
-        this.leagueId = leagueId;
+    public void setClubId(String clubId) {
+        this.clubId = clubId;
     }
 }
