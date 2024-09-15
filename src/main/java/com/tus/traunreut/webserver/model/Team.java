@@ -9,8 +9,9 @@ public class Team {
     private String id;
     private String name;
     private String clubId;
+    private String gender;
 
-    public Team(String id, String name, String clubId) {
+    public Team(String id, String name, String clubId, String gender) {
         this.id = id;
         this.name = name;
         this.clubId = clubId;
@@ -41,5 +42,13 @@ public class Team {
 
     public void setClubId(String clubId) {
         this.clubId = clubId;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 }
