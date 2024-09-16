@@ -2,10 +2,7 @@ package com.tus.traunreut.webserver.controller;
 
 import com.tus.traunreut.webserver.model.Club;
 import com.tus.traunreut.webserver.service.ClubService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +19,10 @@ public class ClubController {
     public void saveClubs(@RequestBody List<Club> clubs)
     {
         clubService.saveClubs(clubs);
+    }
+
+    @GetMapping("/{id}")
+    public Club getClubById(@PathVariable String id) {
+        return clubService.getClubById(id);
     }
 }

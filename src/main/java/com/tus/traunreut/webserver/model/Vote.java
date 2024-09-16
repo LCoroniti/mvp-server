@@ -1,10 +1,13 @@
 package com.tus.traunreut.webserver.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 
 public class Vote {
     private String playerId;
+    @JsonIgnore
     private String ipAddress;
 
     public Vote(String playerId, String ipAddress) {

@@ -1,5 +1,6 @@
 package com.tus.traunreut.webserver.controller;
 
+import com.tus.traunreut.webserver.dto.MatchDTO;
 import com.tus.traunreut.webserver.model.Match;
 import com.tus.traunreut.webserver.service.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,11 @@ public class MatchController {
         return matchService.getAllMatches();
     }
 
+    @GetMapping("/next")
+    public MatchDTO getNextMatch() {
+        return matchService.getNextMatch();
+    }
+
     @GetMapping("/{id}")
     public Match getMatchById(@PathVariable String id) {
         return matchService.getMatchById(id);
@@ -28,7 +34,12 @@ public class MatchController {
 
     @PostMapping
     public Match createMatch(@RequestBody Match match) {
-        System.out.println("Creating match: " +match.toString());
+        System.out.println("Creating match: " + match.toString());
         return matchService.saveMatch(match);
+    }
+
+    @PutMapping("/{id}")
+    public Match addPlayersToMatch(@PathVariable String id, @RequestBody List<String> playerIds) {
+        return matchService.addPlayersToMatch(id, playerIds);
     }
 }

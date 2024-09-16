@@ -13,15 +13,15 @@ public class Match {
     private String homeTeamId;
     private String awayTeamId;
     private LocalDateTime matchDate;
-    private List<Player> players;
+    private List<String> playerIds;
     private List<Vote> votes;
 
-    public Match(String id, String homeTeam, String awayTeam, LocalDateTime matchDate, List<Player> players, List<Vote> votes) {
+    public Match(String id, String homeTeam, String awayTeam, LocalDateTime matchDate, List<String> players, List<Vote> votes) {
         this.id = id;
         this.homeTeamId = homeTeam;
         this.awayTeamId = awayTeam;
         this.matchDate = matchDate;
-        this.players = players;
+        this.playerIds = players;
         this.votes = votes;
     }
 
@@ -60,12 +60,12 @@ public class Match {
         this.matchDate = matchDate;
     }
 
-    public List<Player> getPlayers() {
-        return players;
+    public List<String> getPlayerIds() {
+        return playerIds;
     }
 
-    public void setPlayers(List<Player> players) {
-        this.players = players;
+    public void setPlayerIds(List<String> playerIds) {
+        this.playerIds = playerIds;
     }
 
     public List<Vote> getVotes() {

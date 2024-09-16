@@ -21,4 +21,8 @@ public class PlayerService {
     public Player savePlayer(Player player) {
         return playerRepository.save(player);
     }
+
+    public List<Player> getAllPlayersByIds(List<String> playerIds) {
+        return playerRepository.findAllById(playerIds);
+    }
 }

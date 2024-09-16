@@ -31,4 +31,8 @@ public class TeamService {
         team.setClubId(club.getId());
         return teamRepository.save(team);
     }
+
+    public Team getTeamById(String id) {
+        return teamRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Team not found"));
+    }
 }

@@ -25,4 +25,8 @@ public class ClubService {
     public List<Club> saveClubs(List<Club> clubs) {
         return clubRepository.saveAll(clubs);
     }
+
+    public Club getClubById(String id) {
+        return clubRepository.findById(id).orElseThrow(() -> new RuntimeException("Club not found"));
+    }
 }
