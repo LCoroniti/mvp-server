@@ -1,8 +1,10 @@
 package com.tus.traunreut.webserver.repository;
 
 import com.tus.traunreut.webserver.model.Club;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ClubRepository extends MongoRepository<Club, String> {
-    Club findByName(String name);
+@Repository
+public interface ClubRepository extends JpaRepository<Club, Long> {
 }
+

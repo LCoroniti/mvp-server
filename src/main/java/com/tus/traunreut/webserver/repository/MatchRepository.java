@@ -1,8 +1,26 @@
 package com.tus.traunreut.webserver.repository;
 
 import com.tus.traunreut.webserver.model.Match;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-public interface MatchRepository extends MongoRepository<Match, String> {
-    Match findFirstByOrderByMatchDateAsc();
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface MatchRepository extends JpaRepository<Match, Long> {
+    /**
+     * Find the next match that is in the future. Returns an empty Optional if no match is found.
+     */
+    Optional<Match> findTopByMatchDateAfterOrderByMatchDateAsc(LocalDateTime dateTime);
+
+    @Query("SELECT m FROM Match m WHERE m.matchDate >= :startOfWeekend AND m.matchDate <= :endOfWeekend ORDER BY m.matchDate ASC")
+    List<Match> findMatchesForCurrentWeekend(
+            @Param("startOfWeekend") LocalDateTime startOfWeekend,
+            @Param("endOfWeekend") LocalDateTime endOfWeekend
+    );
 }
+

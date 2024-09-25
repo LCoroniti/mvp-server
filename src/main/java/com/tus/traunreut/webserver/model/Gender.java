@@ -6,26 +6,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "clubs")
-public class Club {
+@Table(name = "genders")
+public class Gender {
 
     @Id
-    @Column(name = "club_id")
+    @Column(name = "gender_id")
     private Long id;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "logo")
-    private String logoUrl;
-
-    public Club(Long id, String name, String logoUrl) {
+    public Gender(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.logoUrl = logoUrl;
     }
 
-    public Club() {
+    public Gender() {
     }
 
     public Long getId() {
@@ -40,15 +36,7 @@ public class Club {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
+    public void setName(String gender) {
+        this.name = gender;
     }
 }

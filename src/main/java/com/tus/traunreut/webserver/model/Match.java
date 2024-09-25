@@ -1,55 +1,48 @@
 package com.tus.traunreut.webserver.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document(collection = "matches")
+@Entity
+@Table(name = "matches")
 public class Match {
-    @Id
-    private String id;
-    private String homeTeamId;
-    private String awayTeamId;
-    private LocalDateTime matchDate;
-    private List<String> playerIds;
-    private List<Vote> votes;
 
-    public Match(String id, String homeTeam, String awayTeam, LocalDateTime matchDate, List<String> players, List<Vote> votes) {
+    @Id
+    @Column(name = "match_id")
+    private Long id;
+
+    @Column(name = "start_timestamp")
+    private LocalDateTime matchDate;
+
+    @ManyToOne
+    @JoinColumn(name = "home_team_id", referencedColumnName = "team_id")
+    private Team homeTeam;
+
+    @ManyToOne
+    @JoinColumn(name = "guest_team_id", referencedColumnName = "team_id")
+    private Team guestTeam;
+
+    @OneToMany(mappedBy = "match", fetch = FetchType.EAGER)
+    private List<MatchPlayer> players;
+
+    public Match(Long id, LocalDateTime matchDate, Team homeTeam, Team guestTeam) {
         this.id = id;
-        this.homeTeamId = homeTeam;
-        this.awayTeamId = awayTeam;
         this.matchDate = matchDate;
-        this.playerIds = players;
-        this.votes = votes;
+        this.homeTeam = homeTeam;
+        this.guestTeam = guestTeam;
     }
 
     public Match() {
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getHomeTeamId() {
-        return homeTeamId;
-    }
-
-    public void setHomeTeamId(String homeTeamId) {
-        this.homeTeamId = homeTeamId;
-    }
-
-    public String getAwayTeamId() {
-        return awayTeamId;
-    }
-
-    public void setAwayTeamId(String awayTeamId) {
-        this.awayTeamId = awayTeamId;
     }
 
     public LocalDateTime getMatchDate() {
@@ -60,19 +53,27 @@ public class Match {
         this.matchDate = matchDate;
     }
 
-    public List<String> getPlayerIds() {
-        return playerIds;
+    public Team getHomeTeam() {
+        return homeTeam;
     }
 
-    public void setPlayerIds(List<String> playerIds) {
-        this.playerIds = playerIds;
+    public void setHomeTeam(Team homeTeam) {
+        this.homeTeam = homeTeam;
     }
 
-    public List<Vote> getVotes() {
-        return votes;
+    public Team getGuestTeam() {
+        return guestTeam;
     }
 
-    public void setVotes(List<Vote> votes) {
-        this.votes = votes;
+    public void setGuestTeam(Team awayTeam) {
+        this.guestTeam = awayTeam;
+    }
+
+    public List<MatchPlayer> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<MatchPlayer> players) {
+        this.players = players;
     }
 }

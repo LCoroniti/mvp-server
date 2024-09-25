@@ -1,30 +1,46 @@
 package com.tus.traunreut.webserver.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
-@Document(collection = "teams")
+@Entity
+@Table(name = "teams")
 public class Team {
-    @Id
-    private String id;
-    private String name;
-    private String clubId;
-    private String gender;
 
-    public Team(String id, String name, String clubId, String gender) {
+    @Id
+    @Column(name = "team_id")
+    private Long id;
+
+    @Column(name = "name")
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "club_id", referencedColumnName = "club_id")
+    private Club club;
+
+    @ManyToOne
+    @JoinColumn(name = "gender_id", referencedColumnName = "gender_id")
+    private Gender gender;
+
+    @ManyToOne
+    @JoinColumn(name = "league_id", referencedColumnName = "league_id")
+    private League league;
+
+    public Team(Long id, String name, Club club, Gender gender, League league) {
         this.id = id;
         this.name = name;
-        this.clubId = clubId;
+        this.club = club;
+        this.gender = gender;
+        this.league = league;
     }
 
     public Team() {
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -36,19 +52,27 @@ public class Team {
         this.name = name;
     }
 
-    public String getClubId() {
-        return clubId;
+    public Club getClub() {
+        return club;
     }
 
-    public void setClubId(String clubId) {
-        this.clubId = clubId;
+    public void setClub(Club club) {
+        this.club = club;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public League getLeague() {
+        return league;
+    }
+
+    public void setLeague(League league) {
+        this.league = league;
     }
 }

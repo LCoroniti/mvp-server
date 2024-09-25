@@ -1,54 +1,64 @@
 package com.tus.traunreut.webserver.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.*;
 
-
-@Document(collection = "players")
+@Entity
+@Table(name = "players")
 public class Player {
-    @Id
-    private String id;
-    private String name;
-    private String teamId;
 
-    public Player(String id, String name, String teamId) {
+    @Id
+    @Column(name = "player_id")
+    private Long id;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "surname")
+    private String surname;
+
+    @ManyToOne
+    @JoinColumn(name = "team_id", referencedColumnName = "team_id")
+    private Team team;
+
+    public Player(Long id, String firstName, String surname, Team team) {
         this.id = id;
-        this.name = name;
-        this.teamId = teamId;
+        this.firstName = firstName;
+        this.surname = surname;
+        this.team = team;
     }
 
     public Player() {
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String name) {
+        this.firstName = name;
     }
 
-    public String getTeamId() {
-        return teamId;
+    public Team getTeam() {
+        return team;
     }
 
-    public void setTeamId(String teamId) {
-        this.teamId = teamId;
+    public void setTeam(Team team) {
+        this.team = team;
     }
 
-    public String toString() {
-        return "Player{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", teamId='" + teamId + '\'' +
-                '}';
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 }
