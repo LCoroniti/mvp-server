@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
@@ -29,22 +28,17 @@ public class MatchService {
         return matchRepository.findTopByMatchDateAfterOrderByMatchDateAsc(LocalDateTime.now());
     }
 
+    public Optional<Match> getMatchById(Long id) {
+        return matchRepository.findById(id);
+    }
+
     @Transactional
-    public List<Match> getAllMatchesThisWeekend() {
-        LocalDateTime today = LocalDateTime.now();
-        LocalDateTime currentSaturday;
-        if (today.get(ChronoField.DAY_OF_WEEK) == DayOfWeek.SUNDAY.getValue()) {
-            currentSaturday = today.with(TemporalAdjusters.previous(DayOfWeek.SATURDAY))
-                    .toLocalDate()
-                    .atStartOfDay();
-        } else {
-            currentSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
-                    .toLocalDate()
-                    .atStartOfDay();
-        }
+    public List<Match> getAllMatchesCurrentWeek() {
+        LocalDateTime today = LocalDateTime.now().minusHours(1);
         LocalDateTime currentSunday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
                 .toLocalDate()
                 .atTime(LocalTime.MAX);
-        return matchRepository.findMatchesForCurrentWeekend(currentSaturday, currentSunday);
+        return matchRepository.findMatchesInTimeRange(today, currentSunday);
     }
+
 }

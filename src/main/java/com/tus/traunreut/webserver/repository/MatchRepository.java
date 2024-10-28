@@ -18,7 +18,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
     Optional<Match> findTopByMatchDateAfterOrderByMatchDateAsc(LocalDateTime dateTime);
 
     @Query("SELECT m FROM Match m WHERE m.matchDate >= :startOfWeekend AND m.matchDate <= :endOfWeekend ORDER BY m.matchDate ASC")
-    List<Match> findMatchesForCurrentWeekend(
+    List<Match> findMatchesInTimeRange(
             @Param("startOfWeekend") LocalDateTime startOfWeekend,
             @Param("endOfWeekend") LocalDateTime endOfWeekend
     );

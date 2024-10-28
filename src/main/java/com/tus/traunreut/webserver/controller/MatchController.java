@@ -6,6 +6,7 @@ import com.tus.traunreut.webserver.service.external.ImageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.tus.traunreut.webserver.service.MatchService;
@@ -33,9 +34,9 @@ public class MatchController {
         return new ResponseEntity<>(matches, HttpStatus.OK);
     }
 
-    @GetMapping("/weekend")
-    public ResponseEntity<List<MatchDto>> getAllMatchesThisWeekend() {
-        List<Match> matches = matchService.getAllMatchesThisWeekend();
+    @GetMapping("/week")
+    public ResponseEntity<List<MatchDto>> getAllMatchesCurrentWeek() {
+        List<Match> matches = matchService.getAllMatchesCurrentWeek();
 
         if (matches.isEmpty()) {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
@@ -81,9 +82,32 @@ public class MatchController {
     public ResponseEntity<MatchDto> getNextMatch() {
         Optional<Match> nextMatch = matchService.getNextMatch();
         if (nextMatch.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         Match match = nextMatch.get();
+        String homeTeamLogo;
+        String guestTeamLogo;
+        try {
+            homeTeamLogo = imageService.fetchLogoBase64(match.getHomeTeam().getClub().getLogoUrl());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        try {
+            guestTeamLogo = imageService.fetchLogoBase64(match.getGuestTeam().getClub().getLogoUrl());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+        return new ResponseEntity<>(new MatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
+    }
+
+    @GetMapping("/{matchId}")
+    public ResponseEntity<MatchDto> getMatch(@PathVariable Long matchId)
+    {
+        Optional<Match> idMatch = matchService.getMatchById(matchId);
+        if (idMatch.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        Match match = idMatch.get();
         String homeTeamLogo;
         String guestTeamLogo;
         try {
