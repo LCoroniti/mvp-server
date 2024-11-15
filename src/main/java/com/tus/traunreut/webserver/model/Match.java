@@ -8,9 +8,9 @@ import java.util.List;
 @Entity
 @Table(name = "matches")
 public class Match {
-
     @Id
     @Column(name = "match_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "start_timestamp")
@@ -27,11 +27,28 @@ public class Match {
     @OneToMany(mappedBy = "match", fetch = FetchType.EAGER)
     private List<MatchPlayer> players;
 
-    public Match(Long id, LocalDateTime matchDate, Team homeTeam, Team guestTeam) {
+    @Column(name = "home_goals")
+    private Integer homeGoals;
+
+    @Column(name = "guest_goals")
+    private Integer guestGoals;
+
+    @Column(name = "has_report")
+    private boolean hasReport;
+
+    @Column(name = "nuliga_match_id")
+    private String nuligaMatchid;
+
+    public Match(Long id, LocalDateTime matchDate, Team homeTeam, Team guestTeam, List<MatchPlayer> players, Integer homeGoals, Integer guestGoals, boolean hasReport, String nuligaMatchid) {
         this.id = id;
         this.matchDate = matchDate;
         this.homeTeam = homeTeam;
         this.guestTeam = guestTeam;
+        this.players = players;
+        this.homeGoals = homeGoals;
+        this.guestGoals = guestGoals;
+        this.hasReport = hasReport;
+        this.nuligaMatchid = nuligaMatchid;
     }
 
     public Match() {
@@ -75,5 +92,45 @@ public class Match {
 
     public void setPlayers(List<MatchPlayer> players) {
         this.players = players;
+    }
+
+    public int getGuestGoals() {
+        return guestGoals;
+    }
+
+    public void setGuestGoals(int guestGoals) {
+        this.guestGoals = guestGoals;
+    }
+
+    public int getHomeGoals() {
+        return homeGoals;
+    }
+
+    public void setHomeGoals(int homeGoals) {
+        this.homeGoals = homeGoals;
+    }
+
+    public void setHomeGoals(Integer homeGoals) {
+        this.homeGoals = homeGoals;
+    }
+
+    public void setGuestGoals(Integer guestGoals) {
+        this.guestGoals = guestGoals;
+    }
+
+    public boolean hasReport() {
+        return hasReport;
+    }
+
+    public void setHasReport(boolean hasReport) {
+        this.hasReport = hasReport;
+    }
+
+    public String getNuligaMatchId() {
+        return nuligaMatchid;
+    }
+
+    public void setNuligaMatchId(String nuligaMatchid) {
+        this.nuligaMatchid = nuligaMatchid;
     }
 }

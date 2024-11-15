@@ -1,9 +1,6 @@
 package com.tus.traunreut.webserver.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "leagues")
@@ -11,14 +8,19 @@ public class League {
 
     @Id
     @Column(name = "league_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
     private String name;
 
-    public League(Long id, String name) {
+    @Column(name = "match_plan_url")
+    private String leaguePlanUrl;
+
+    public League(Long id, String name, String leaguePlanUrl) {
         this.id = id;
         this.name = name;
+        this.leaguePlanUrl = leaguePlanUrl;
     }
 
     public League() {
@@ -38,5 +40,13 @@ public class League {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getLeaguePlanUrl() {
+        return leaguePlanUrl;
+    }
+
+    public void setLeaguePlanUrl(String leaguePlanUrl) {
+        this.leaguePlanUrl = leaguePlanUrl;
     }
 }

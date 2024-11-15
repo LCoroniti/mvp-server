@@ -1,6 +1,8 @@
 package com.tus.traunreut.webserver.service;
 
+import com.tus.traunreut.webserver.model.League;
 import com.tus.traunreut.webserver.model.Team;
+import com.tus.traunreut.webserver.repository.LeagueRepository;
 import com.tus.traunreut.webserver.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +13,11 @@ import java.util.Optional;
 public class TeamService {
 
     private final TeamRepository teamRepository;
+    private final LeagueRepository leagueRepository;
 
-    public TeamService(TeamRepository teamRepository) {
+    public TeamService(TeamRepository teamRepository, LeagueRepository leagueRepository) {
         this.teamRepository = teamRepository;
+        this.leagueRepository = leagueRepository;
     }
 
     public List<Team> getAllTeams() {
@@ -22,6 +26,14 @@ public class TeamService {
 
     public Optional<Team> getTeamById(Long id) {
         return teamRepository.findById(id);
+    }
+
+    public Optional<Team> getTeamByNameAndLeague(String name, String leagueName) {
+//        League league = leagueRepository.findByName(leagueName).orElse(null);
+//        if (league == null) {
+//            return Optional.empty();
+//        }
+        return teamRepository.findByNameAndLeague_Name(name, leagueName);
     }
 
     public Team saveTeam(Team team) {

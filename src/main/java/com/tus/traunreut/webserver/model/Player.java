@@ -8,6 +8,7 @@ public class Player {
 
     @Id
     @Column(name = "player_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "first_name")
