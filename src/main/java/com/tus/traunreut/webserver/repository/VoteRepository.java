@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,5 +28,9 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
 
     @Query("SELECT v.player.id FROM Vote v WHERE v.match.id = :matchId AND v.voterId = :voterId")
     Long findPlayerIdByMatchIdAndVoterId(@Param("matchId") Long matchId, @Param("voterId") int voterId);
+
+    List<Vote> findByMatchId(Long matchId);
+
+    List<Vote> findByMatchIdIn(List<Long> matchIds);
 }
 

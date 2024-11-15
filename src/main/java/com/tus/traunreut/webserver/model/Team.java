@@ -2,12 +2,15 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "teams")
 public class Team {
 
     @Id
     @Column(name = "team_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")
@@ -74,5 +77,18 @@ public class Team {
 
     public void setLeague(League league) {
         this.league = league;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Team team = (Team) o;
+        return Objects.equals(name, team.name) && Objects.equals(club, team.club) && Objects.equals(gender, team.gender) && Objects.equals(league, team.league);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, club, gender, league);
     }
 }

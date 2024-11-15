@@ -8,14 +8,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MatchDto {
+public abstract class MatchDto {
     private String id;
     private String homeTeamName;
     private String guestTeamName;
     private String homeTeamLogoBase64;
     private String guestTeamLogoBase64;
     private LocalDateTime matchDate;
-    private List<PlayerDto> players;
     private Gender gender;
     private League league;
 
@@ -26,9 +25,6 @@ public class MatchDto {
         this.homeTeamLogoBase64 = homeTeamLogoBase64;
         this.guestTeamLogoBase64 = guestTeamLogoBase64;
         this.matchDate = match.getMatchDate();
-        this.players = (match.getPlayers() != null)
-                ? match.getPlayers().stream().map(PlayerDto::new).toList()
-                : new ArrayList<>();
         this.gender = match.getHomeTeam().getGender();
         this.league = match.getHomeTeam().getLeague();
     }
@@ -71,14 +67,6 @@ public class MatchDto {
 
     public void setMatchDate(LocalDateTime matchDate) {
         this.matchDate = matchDate;
-    }
-
-    public List<PlayerDto> getPlayers() {
-        return players;
-    }
-
-    public void setPlayers(List<PlayerDto> players) {
-        this.players = players;
     }
 
     public String getId() {

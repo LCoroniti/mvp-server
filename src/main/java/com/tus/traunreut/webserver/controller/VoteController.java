@@ -1,6 +1,5 @@
 package com.tus.traunreut.webserver.controller;
 
-import com.tus.traunreut.webserver.dto.PlayerDto;
 import com.tus.traunreut.webserver.model.Player;
 import com.tus.traunreut.webserver.service.VotingService;
 import jakarta.servlet.http.HttpServletRequest;

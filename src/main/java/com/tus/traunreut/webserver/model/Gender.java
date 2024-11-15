@@ -1,9 +1,6 @@
 package com.tus.traunreut.webserver.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "genders")
@@ -11,6 +8,7 @@ public class Gender {
 
     @Id
     @Column(name = "gender_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name")

@@ -1,14 +1,18 @@
 package com.tus.traunreut.webserver.controller;
 
-import com.tus.traunreut.webserver.dto.MatchDto;
+import com.tus.traunreut.webserver.dto.history.HistoryMatchDto;
+import com.tus.traunreut.webserver.dto.voting.VotingMatchDto;
 import com.tus.traunreut.webserver.model.Match;
 import com.tus.traunreut.webserver.service.external.ImageService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.tus.traunreut.webserver.service.MatchService;
 
 import java.util.Collections;
@@ -34,15 +38,58 @@ public class MatchController {
         return new ResponseEntity<>(matches, HttpStatus.OK);
     }
 
+    @GetMapping("/past")
+    public ResponseEntity<PagedModel<EntityModel<HistoryMatchDto>>> getAllVotedMatches(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(required = false) String leagueName,
+            PagedResourcesAssembler<HistoryMatchDto> pagedAssembler) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<HistoryMatchDto> pastMatches = matchService.getAllPastMatchesWithVotes(pageable, leagueName);
+
+        List<CompletableFuture<Void>> futures = pastMatches.getContent().stream().map(matchDto -> {
+            CompletableFuture<String> homeLogoFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return imageService.fetchLogoBase64(matchDto.getMatch().getHomeTeam().getClub().getLogoUrl());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            CompletableFuture<String> guestLogoFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return imageService.fetchLogoBase64(matchDto.getMatch().getGuestTeam().getClub().getLogoUrl());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            return CompletableFuture.allOf(homeLogoFuture, guestLogoFuture).thenAccept(_ -> {
+                try {
+                    String homeLogo = homeLogoFuture.get();
+                    String guestLogo = guestLogoFuture.get();
+                    matchDto.setHomeTeamLogoBase64(homeLogo);
+                    matchDto.setGuestTeamLogoBase64(guestLogo);
+                } catch (Exception e) {
+                    System.err.println("Error fetching logos: " + e.getMessage());
+                }
+            });
+        }).toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        PagedModel<EntityModel<HistoryMatchDto>> model = pagedAssembler.toModel(pastMatches);
+        return new ResponseEntity<>(model, HttpStatus.OK);
+    }
+
     @GetMapping("/week")
-    public ResponseEntity<List<MatchDto>> getAllMatchesCurrentWeek() {
+    public ResponseEntity<List<VotingMatchDto>> getAllMatchesCurrentWeek() {
         List<Match> matches = matchService.getAllMatchesCurrentWeek();
 
         if (matches.isEmpty()) {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
         }
 
-        List<CompletableFuture<MatchDto>> futureMatchDtos = matches.stream()
+        List<CompletableFuture<VotingMatchDto>> futureMatchDtos = matches.stream()
                 .map(match -> CompletableFuture.supplyAsync(() -> {
                     String homeTeamLogo = null;
                     String guestTeamLogo = null;
@@ -50,28 +97,24 @@ public class MatchController {
                     try {
                         homeTeamLogo = imageService.fetchLogoBase64(match.getHomeTeam().getClub().getLogoUrl());
                     } catch (Exception e) {
-                        // Log the error and continue, you can return a placeholder or null logo if needed
                         System.err.println("Failed to fetch home team logo for match: " + match.getId());
-                        e.printStackTrace();
                     }
 
                     try {
                         guestTeamLogo = imageService.fetchLogoBase64(match.getGuestTeam().getClub().getLogoUrl());
                     } catch (Exception e) {
-                        // Log the error and continue, you can return a placeholder or null logo if needed
                         System.err.println("Failed to fetch guest team logo for match: " + match.getId());
-                        e.printStackTrace();
                     }
 
                     // Return the MatchDto with the fetched logos
-                    return new MatchDto(match, homeTeamLogo, guestTeamLogo);
+                    return new VotingMatchDto(match, homeTeamLogo, guestTeamLogo);
                 }))
                 .toList();
 
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futureMatchDtos.toArray(new CompletableFuture[0]));
 
         // Wait for all futures to complete
-        List<MatchDto> matchDtos = allOf.thenApply(v -> futureMatchDtos.stream()
+        List<VotingMatchDto> matchDtos = allOf.thenApply(v -> futureMatchDtos.stream()
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList()))
                 .join();
@@ -79,7 +122,7 @@ public class MatchController {
     }
 
     @GetMapping("/next")
-    public ResponseEntity<MatchDto> getNextMatch() {
+    public ResponseEntity<VotingMatchDto> getNextMatch() {
         Optional<Match> nextMatch = matchService.getNextMatch();
         if (nextMatch.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -97,11 +140,11 @@ public class MatchController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
-        return new ResponseEntity<>(new MatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
+        return new ResponseEntity<>(new VotingMatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
     }
 
     @GetMapping("/{matchId}")
-    public ResponseEntity<MatchDto> getMatch(@PathVariable Long matchId)
+    public ResponseEntity<VotingMatchDto> getMatch(@PathVariable Long matchId)
     {
         Optional<Match> idMatch = matchService.getMatchById(matchId);
         if (idMatch.isEmpty()) {
@@ -120,6 +163,6 @@ public class MatchController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
-        return new ResponseEntity<>(new MatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
+        return new ResponseEntity<>(new VotingMatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
     }
 }

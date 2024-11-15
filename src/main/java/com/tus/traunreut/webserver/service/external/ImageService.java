@@ -1,6 +1,7 @@
 package com.tus.traunreut.webserver.service.external;
 
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -14,6 +15,7 @@ public class ImageService {
     /**
      * Fetches the logo from the given URL and returns it as a Base64 encoded string.
      */
+    @Cacheable(value = "logos", key = "#url")
     @Transactional
     public String fetchLogoBase64(String url) throws Exception {
         URL imageUrl = new URL(url);

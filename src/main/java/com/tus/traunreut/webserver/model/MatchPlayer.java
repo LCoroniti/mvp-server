@@ -1,5 +1,6 @@
 package com.tus.traunreut.webserver.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +12,7 @@ public class MatchPlayer {
     @ManyToOne
     @MapsId("matchId")
     @JoinColumn(name = "match_id")
+    @JsonIgnore
     private Match match;
 
     @ManyToOne
