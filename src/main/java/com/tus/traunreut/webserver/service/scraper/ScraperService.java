@@ -41,6 +41,10 @@ public class ScraperService {
                 scraped.getGuestTeam().equals(match.getGuestTeam())).findFirst().orElse(null);
     }
 
+    public void scrapeMatchId(League league, Match match) {
+        matchScraper.scrapeMeetingIds(league, match);
+    }
+
     public List<MatchPlayer> getMatchPlayers(Match match) {
         try {
             return matchPlayerScraper.getMatchPlayers(match);

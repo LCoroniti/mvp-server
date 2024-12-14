@@ -2,7 +2,6 @@ package com.tus.traunreut.webserver.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 public class DateTimeUtil {
     /**
@@ -12,7 +11,11 @@ public class DateTimeUtil {
         return LocalDateTime.now(ZoneId.of("Europe/Berlin"));
     }
 
-    public static long nowGermanMillis() {
-        return LocalDateTime.now().atZone(ZoneId.of("Europe/Berlin")).toInstant().toEpochMilli();
+    public static long nowGermanSecondsRounded() {
+        long epochSeconds = LocalDateTime.now()
+                .atZone(ZoneId.of("Europe/Berlin"))
+                .toInstant()
+                .getEpochSecond();
+        return epochSeconds - (epochSeconds % 15);
     }
 }
