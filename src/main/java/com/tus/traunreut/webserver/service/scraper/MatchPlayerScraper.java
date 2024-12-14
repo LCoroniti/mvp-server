@@ -24,10 +24,11 @@ public class MatchPlayerScraper {
         this.playerService = playerService;
     }
 
-    public List<MatchPlayer> getMatchPlayers(Match match) throws IOException {
-        long now = DateTimeUtil.nowGermanMillis();
-        String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/" + now;
-        String playersJson = fetchPlayers(url);
+    public List<MatchPlayer>  getMatchPlayers(Match match) throws IOException {
+        long now = DateTimeUtil.nowGermanSecondsRounded();
+        String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/time/" + now;
+        String playersJson = getRequest(url);
+        System.out.println("REQUESTING NULIGA LIVE ...");
 
         JSONObject jsonObject = new JSONObject(playersJson);
         JSONArray matchPlayers = jsonObject.getJSONArray("meetingPersons");
@@ -50,7 +51,7 @@ public class MatchPlayerScraper {
         return result;
     }
 
-    public String fetchPlayers(String url) {
+    private String getRequest(String url) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("Accept", "application/json");

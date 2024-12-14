@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "votes")
 public class Vote {
@@ -68,5 +70,17 @@ public class Vote {
 
     public void setVoterId(int voterId) {
         this.voterId = voterId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Vote vote = (Vote) o;
+        return voterId == vote.voterId && Objects.equals(match, vote.match) && Objects.equals(player, vote.player);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(match, player, voterId);
     }
 }

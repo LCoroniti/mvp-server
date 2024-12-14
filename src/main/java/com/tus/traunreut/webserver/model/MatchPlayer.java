@@ -3,6 +3,8 @@ package com.tus.traunreut.webserver.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "matchplayers")
 public class MatchPlayer {
@@ -63,5 +65,17 @@ public class MatchPlayer {
 
     public void setJerseyNumber(int jerseyNumber) {
         this.jerseyNumber = jerseyNumber;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MatchPlayer that = (MatchPlayer) o;
+        return jerseyNumber == that.jerseyNumber && Objects.equals(match, that.match) && Objects.equals(player, that.player);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(match, player, jerseyNumber);
     }
 }

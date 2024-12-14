@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "leagues")
 public class League {
@@ -17,10 +19,14 @@ public class League {
     @Column(name = "match_plan_url")
     private String leaguePlanUrl;
 
-    public League(Long id, String name, String leaguePlanUrl) {
+    @Column(name = "group_id")
+    private String groupdId;
+
+    public League(Long id, String name, String leaguePlanUrl, String groupdId) {
         this.id = id;
         this.name = name;
         this.leaguePlanUrl = leaguePlanUrl;
+        this.groupdId = groupdId;
     }
 
     public League() {
@@ -48,5 +54,25 @@ public class League {
 
     public void setLeaguePlanUrl(String leaguePlanUrl) {
         this.leaguePlanUrl = leaguePlanUrl;
+    }
+
+    public String getGroupdId() {
+        return groupdId;
+    }
+
+    public void setGroupdId(String groupdId) {
+        this.groupdId = groupdId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        League league = (League) o;
+        return Objects.equals(name, league.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, leaguePlanUrl);
     }
 }

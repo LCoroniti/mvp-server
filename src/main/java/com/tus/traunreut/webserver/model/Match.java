@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "matches")
@@ -132,5 +133,17 @@ public class Match {
 
     public void setNuligaMatchId(String nuligaMatchid) {
         this.nuligaMatchid = nuligaMatchid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Match match = (Match) o;
+        return Objects.equals(homeTeam, match.homeTeam) && Objects.equals(guestTeam, match.guestTeam);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(homeTeam, guestTeam);
     }
 }

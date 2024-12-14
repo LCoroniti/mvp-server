@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "genders")
 public class Gender {
@@ -36,5 +38,17 @@ public class Gender {
 
     public void setName(String gender) {
         this.name = gender;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Gender gender = (Gender) o;
+        return Objects.equals(name, gender.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(name);
     }
 }

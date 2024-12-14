@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "players")
 public class Player {
@@ -61,5 +63,17 @@ public class Player {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(firstName, player.firstName) && Objects.equals(surname, player.surname) && Objects.equals(team, player.team);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, surname, team);
     }
 }

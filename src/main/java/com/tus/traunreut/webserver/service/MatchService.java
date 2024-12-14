@@ -47,8 +47,8 @@ public class MatchService {
     public void onStartup() {
         try {
             List<Match> scrapedMatches = scraperService.scrapeMatches();
-            for (Match match : scrapedMatches)
-            {
+            removeCanceledMatchers(scrapedMatches);
+            for (Match match : scrapedMatches) {
                 Optional<Match> persistentMatch = getMatch(match.getHomeTeam(), match.getGuestTeam());
                 if (persistentMatch.isEmpty()) {
                     matchRepository.save(match);
@@ -58,16 +58,22 @@ public class MatchService {
                 }
                 if (match.getNuligaMatchId() != null && !match.hasReport()) {
                     // TODO: Fetch report from handball.net (When statistics for players is integrated)
-                } else {
-                    // Schedule the fetching of the MatchPlayers when the Match starts
-                    TaskScheduler.getInstance().scheduleTask(() -> {
-                        List<MatchPlayer> matchPlayers = scraperService.getMatchPlayers(match);
-                        matchPlayerRepository.saveAll(matchPlayers);
-                    }, match.getMatchDate());
-                    // Schedule the fetching of the Match report 2 hours after the match ended
+                } else if (persistentMatch.isPresent()){
+                    Match m = persistentMatch.get();
+                    if (match.getMatchDate().isAfter(LocalDateTime.now())) {
+                        // Schedule the fetching of the MatchPlayers when the Match starts
+                        TaskScheduler.getInstance().scheduleTask(() -> {
+                            scraperService.scrapeMatchId(m.getHomeTeam().getLeague(), m);
+                            List<MatchPlayer> matchPlayers = scraperService.getMatchPlayers(m);
+                            matchPlayerRepository.saveAll(matchPlayers);
+                            matchRepository.save(m);
+                        }, match.getMatchDate());
+                    }
+                    // Schedule the fetching of the Match report 2 hours after the match started
                     TaskScheduler.getInstance().scheduleTask(() -> {
                         try {
-                            Match updated = scraperService.scrapeMatch(match);
+                            Match updated = scraperService.scrapeMatch(m);
+                            matchRepository.save(updated);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -77,6 +83,33 @@ public class MatchService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Remove matches that are in the db but are not present in the scraped matches.
+     */
+    public void removeCanceledMatchers(List<Match> scraped) {
+        List<Match> persistentMatches = matchRepository.findAll();
+        List<Match> removedMatches = persistentMatches.stream().filter(match -> {
+            for (Match scrape : scraped) {
+                if (scrape.getHomeTeam().equals(match.getHomeTeam()) && scrape.getGuestTeam().equals(match.getGuestTeam())) {
+                    return false;
+                }
+            }
+            return true;
+        }).toList();
+        List<Match> postponedGames = persistentMatches.stream().filter(match -> {
+            for (Match scrape : scraped) {
+                if (scrape.getHomeTeam().equals(match.getHomeTeam()) && scrape.getGuestTeam().equals(match.getGuestTeam())
+                        && !scrape.getMatchDate().equals(match.getMatchDate())) {
+                    match.setMatchDate(scrape.getMatchDate());
+                    return true;
+                }
+            }
+            return false;
+        }).toList();
+        matchRepository.deleteAllById(removedMatches.stream().map(Match::getId).toList());
+        matchRepository.saveAll(postponedGames);
     }
 
     public List<Match> getAllMatches() {
@@ -101,7 +134,7 @@ public class MatchService {
     }
 
     public Page<HistoryMatchDto> getAllPastMatchesWithVotes(Pageable pageable, String leagueName) {
-        LocalDateTime now = DateTimeUtil.nowGerman().plusHours(1).plusSeconds(10);
+        LocalDateTime now = DateTimeUtil.nowGerman().minusHours(1).minusMinutes(30);
 
         // Fetch paginated past matches
         Page<Match> pastMatchesPage = null;
@@ -173,8 +206,7 @@ public class MatchService {
         });
     }
 
-    public Optional<Match> getMatch(Team homeTeam, Team guestTeam)
-    {
+    public Optional<Match> getMatch(Team homeTeam, Team guestTeam) {
         return matchRepository.findByHomeTeamAndGuestTeam(homeTeam, guestTeam);
     }
 }

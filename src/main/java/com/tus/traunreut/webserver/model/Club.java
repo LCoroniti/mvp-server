@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.model;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "clubs")
 public class Club {
@@ -48,5 +50,17 @@ public class Club {
 
     public void setLogoUrl(String logoUrl) {
         this.logoUrl = logoUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Club club = (Club) o;
+        return Objects.equals(name, club.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, logoUrl);
     }
 }

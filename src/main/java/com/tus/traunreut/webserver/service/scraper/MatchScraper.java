@@ -4,6 +4,13 @@ import com.tus.traunreut.webserver.model.League;
 import com.tus.traunreut.webserver.model.Match;
 import com.tus.traunreut.webserver.model.Team;
 import com.tus.traunreut.webserver.service.TeamService;
+import com.tus.traunreut.webserver.util.DateTimeUtil;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -53,7 +61,13 @@ public class MatchScraper {
                 String homeTeam = cleanTeamName(cells.get(HOME_TEAM_INDEX).text());
                 String guestTeam = cleanTeamName(cells.get(GUEST_TEAM_INDEX).text());
                 Match match = new Match();
-                match.setMatchDate(parseLocalDateTime(date, time));
+                LocalDateTime matchDate;
+                try {
+                    matchDate = parseLocalDateTime(date, time);
+                } catch (DateTimeParseException e) {
+                    continue;
+                }
+                match.setMatchDate(matchDate);
                 Team home = teamService.getTeamByNameAndLeague(homeTeam, league.getName()).orElse(null);
                 Team guest = teamService.getTeamByNameAndLeague(guestTeam, league.getName()).orElse(null);
                 if (home == null || guest == null) {
@@ -78,6 +92,47 @@ public class MatchScraper {
         return matches;
     }
 
+    /**
+     * Scrape the meeting id for the given match
+     */
+    public void scrapeMeetingIds(League league, Match match) {
+        long now = DateTimeUtil.nowGermanSecondsRounded();
+        String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/meetings/" + league.getGroupdId() + "/time/" + now;
+        System.out.println("REQUESTING NULIGA LIVE for " + match.getHomeTeam().getName() + ":"+match.getGuestTeam().getName() + " (" + url+")");
+        String meetingsJson = getRequest(url);
+
+        JSONObject jsonObject = new JSONObject(meetingsJson);
+        JSONArray meetings = jsonObject.getJSONArray("meetings");
+        for (int i = 0; i < meetings.length(); i++) {
+            JSONObject meeting = meetings.getJSONObject(i);
+
+            String homeTeam = meeting.getString("teamHome");
+            String guestTeam = meeting.getString("teamGuest");
+            if (homeTeam.equals(match.getHomeTeam().getName()) && guestTeam.equals(match.getGuestTeam().getName()))
+            {
+                match.setNuligaMatchId(meeting.getString("meetingID"));
+            }
+        }
+    }
+
+    private String getRequest(String url) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(url);
+            request.setHeader("Accept", "application/json");
+
+            return client.execute(request, response -> {
+                int statusCode = response.getCode();
+                if (statusCode >= 200 && statusCode < 300) {
+                    return EntityUtils.toString(response.getEntity());
+                } else {
+                    throw new IOException("Unexpected response status: " + statusCode);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String getMeetingNumber(String htmlElement) {
         Pattern pattern = Pattern.compile("meeting=(\\d+)&amp");
         Matcher matcher = pattern.matcher(htmlElement);
@@ -95,7 +150,7 @@ public class MatchScraper {
         return text.replaceAll("\\s", "");
     }
 
-    private LocalDateTime parseLocalDateTime(String date, String time) {
+    private LocalDateTime parseLocalDateTime(String date, String time) throws DateTimeParseException {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDate localDate = LocalDate.parse(date, dateFormatter);
