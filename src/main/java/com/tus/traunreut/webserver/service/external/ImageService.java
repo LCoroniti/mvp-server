@@ -1,6 +1,9 @@
 package com.tus.traunreut.webserver.service.external;
 
+import com.tus.traunreut.webserver.log.Markers;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +15,14 @@ import java.util.Base64;
 
 @Service
 public class ImageService {
+    private final static Logger networkLogger = LoggerFactory.getLogger("NETWORK");
     /**
      * Fetches the logo from the given URL and returns it as a Base64 encoded string.
      */
     @Cacheable(value = "logos", key = "#url")
     @Transactional
     public String fetchLogoBase64(String url) throws Exception {
+        networkLogger.info(Markers.NETWORK, "Fetching logo from {}", url);
         URL imageUrl = new URL(url);
         HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
         connection.setRequestMethod("GET");

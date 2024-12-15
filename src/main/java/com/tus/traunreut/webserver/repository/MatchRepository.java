@@ -28,6 +28,8 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
 
     Page<Match> findByMatchDateBeforeOrderByMatchDateDesc(LocalDateTime date, Pageable pageable);
 
+    List<Match> findByMatchDateGreaterThanEqual(LocalDateTime timestamp);
+
     Page<Match> findByMatchDateBeforeAndHomeTeam_League_NameOrderByMatchDateDesc(
             LocalDateTime date, String leagueName, Pageable pageable);
 

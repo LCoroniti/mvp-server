@@ -28,7 +28,6 @@ dependencies {
     implementation 'org.apache.httpcomponents.core5:httpcore5:5.3.1'
     implementation 'org.json:json:20240303'
 
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
