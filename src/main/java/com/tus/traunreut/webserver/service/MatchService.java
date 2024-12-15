@@ -3,14 +3,18 @@ package com.tus.traunreut.webserver.service;
 import com.tus.traunreut.webserver.dto.PlayerDto;
 import com.tus.traunreut.webserver.dto.history.HistoryMatchDto;
 import com.tus.traunreut.webserver.dto.history.VoteDto;
+import com.tus.traunreut.webserver.log.Markers;
 import com.tus.traunreut.webserver.model.*;
 import com.tus.traunreut.webserver.repository.MatchPlayerRepository;
 import com.tus.traunreut.webserver.repository.MatchRepository;
 import com.tus.traunreut.webserver.repository.VoteRepository;
+import com.tus.traunreut.webserver.service.schedule.MatchTask;
 import com.tus.traunreut.webserver.service.schedule.TaskScheduler;
 import com.tus.traunreut.webserver.service.scraper.ScraperService;
 import com.tus.traunreut.webserver.util.DateTimeUtil;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -31,6 +35,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
+    private static final Logger dbLogger = LoggerFactory.getLogger("DATABASE");
+
     private final MatchRepository matchRepository;
     private final VoteRepository voteRepository;
     private final MatchPlayerRepository matchPlayerRepository;
@@ -45,6 +51,43 @@ public class MatchService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup() {
+        updateAllMatches();
+        scheduleAllMatchTasks();
+    }
+
+    /**
+     * For each match that is in the future, the following tasks will be scheduled for execution:
+     * - At match start: Retrieve match id and afterward all MatchPlayers for the match
+     * - 2 hours after match start: Retrieve the match result
+     */
+    public void scheduleAllMatchTasks() {
+        List<Match> upcomingMatches = matchRepository.findByMatchDateGreaterThanEqual(DateTimeUtil.nowGerman());
+
+        for (Match upcomingMatch : upcomingMatches) {
+            // Scrapes match id and afterward the players for the match
+            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, () -> {
+                scraperService.scrapeMatchId(upcomingMatch.getHomeTeam().getLeague(), upcomingMatch);
+                List<MatchPlayer> matchPlayers = scraperService.getMatchPlayers(upcomingMatch);
+                matchPlayerRepository.saveAll(matchPlayers);
+                matchRepository.save(upcomingMatch);
+            }), upcomingMatch.getMatchDate());
+            // Scrape the match result
+            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, () -> {
+                try {
+                    Match updated = scraperService.scrapeMatch(upcomingMatch);
+                    matchRepository.save(updated);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }), upcomingMatch.getMatchDate().plusHours(2));
+        }
+    }
+
+    /**
+     * Fetches all matches from nuliga and updates the existing matches.
+     * Removes canceled matches from the database.
+     */
+    public void updateAllMatches() {
         try {
             List<Match> scrapedMatches = scraperService.scrapeMatches();
             removeCanceledMatchers(scrapedMatches);
@@ -55,29 +98,6 @@ public class MatchService {
                 } else if (match.hasReport() && !persistentMatch.get().hasReport()) {
                     match.setId(persistentMatch.get().getId());
                     matchRepository.save(match);
-                }
-                if (match.getNuligaMatchId() != null && !match.hasReport()) {
-                    // TODO: Fetch report from handball.net (When statistics for players is integrated)
-                } else if (persistentMatch.isPresent()){
-                    Match m = persistentMatch.get();
-                    if (match.getMatchDate().isAfter(LocalDateTime.now())) {
-                        // Schedule the fetching of the MatchPlayers when the Match starts
-                        TaskScheduler.getInstance().scheduleTask(() -> {
-                            scraperService.scrapeMatchId(m.getHomeTeam().getLeague(), m);
-                            List<MatchPlayer> matchPlayers = scraperService.getMatchPlayers(m);
-                            matchPlayerRepository.saveAll(matchPlayers);
-                            matchRepository.save(m);
-                        }, match.getMatchDate());
-                    }
-                    // Schedule the fetching of the Match report 2 hours after the match started
-                    TaskScheduler.getInstance().scheduleTask(() -> {
-                        try {
-                            Match updated = scraperService.scrapeMatch(m);
-                            matchRepository.save(updated);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, match.getMatchDate().plusHours(2));
                 }
             }
         } catch (IOException e) {
@@ -96,12 +116,19 @@ public class MatchService {
                     return false;
                 }
             }
+            dbLogger.info(Markers.DATABASE, "Match will be removed: {} : {} (League = {})", match.getHomeTeam().getName(), match.getGuestTeam().getName(), match.getHomeTeam().getLeague().getName());
             return true;
         }).toList();
         List<Match> postponedGames = persistentMatches.stream().filter(match -> {
             for (Match scrape : scraped) {
                 if (scrape.getHomeTeam().equals(match.getHomeTeam()) && scrape.getGuestTeam().equals(match.getGuestTeam())
                         && !scrape.getMatchDate().equals(match.getMatchDate())) {
+                    dbLogger.info(Markers.DATABASE, "Match was postponed: {} : {} (League = {}) from {} to {}",
+                            match.getHomeTeam().getName(),
+                            match.getGuestTeam().getName(),
+                            match.getHomeTeam().getLeague().getName(),
+                            DateTimeUtil.formatDate(match.getMatchDate()),
+                            DateTimeUtil.formatDate(scrape.getMatchDate()));
                     match.setMatchDate(scrape.getMatchDate());
                     return true;
                 }

@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.util;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class DateTimeUtil {
     /**
@@ -17,5 +19,11 @@ public class DateTimeUtil {
                 .toInstant()
                 .getEpochSecond();
         return epochSeconds - (epochSeconds % 15);
+    }
+
+    public static String formatDate(LocalDateTime dateTime)
+    {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm", Locale.GERMAN);
+        return dateTime.format(formatter);
     }
 }

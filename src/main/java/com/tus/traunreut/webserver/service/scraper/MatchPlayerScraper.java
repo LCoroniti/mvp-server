@@ -1,6 +1,7 @@
 package com.tus.traunreut.webserver.service.scraper;
 
 
+import com.tus.traunreut.webserver.log.Markers;
 import com.tus.traunreut.webserver.model.*;
 import com.tus.traunreut.webserver.service.PlayerService;
 import com.tus.traunreut.webserver.util.DateTimeUtil;
@@ -10,6 +11,8 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -18,6 +21,8 @@ import java.util.List;
 
 @Component
 public class MatchPlayerScraper {
+    private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
+
     private final PlayerService playerService;
 
     public MatchPlayerScraper(PlayerService playerService) {
@@ -28,8 +33,6 @@ public class MatchPlayerScraper {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/time/" + now;
         String playersJson = getRequest(url);
-        System.out.println("REQUESTING NULIGA LIVE ...");
-
         JSONObject jsonObject = new JSONObject(playersJson);
         JSONArray matchPlayers = jsonObject.getJSONArray("meetingPersons");
         List<MatchPlayer> result = new ArrayList<>();
@@ -52,6 +55,7 @@ public class MatchPlayerScraper {
     }
 
     private String getRequest(String url) {
+        networkLogger.info(Markers.NETWORK,"GET request to {}", url);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("Accept", "application/json");

@@ -1,0 +1,53 @@
+<configuration>
+
+    <!-- Appender for network.log -->
+    <appender name="NETWORK_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/network.log</file>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [NETWORK] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender for database.log -->
+    <appender name="DATABASE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/database.log</file>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [DATABASE] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Console appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%marker] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger for the NETWORK marker -->
+    <logger name="NETWORK" level="INFO">
+        <appender-ref ref="NETWORK_FILE"/>
+        <filter class="ch.qos.logback.classic.filter.MarkerFilter">
+            <Marker>NETWORK</Marker>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+    </logger>
+
+    <!-- Logger for the DATABASE marker -->
+    <logger name="DATABASE" level="INFO">
+        <appender-ref ref="DATABASE_FILE"/>
+        <filter class="ch.qos.logback.classic.filter.MarkerFilter">
+            <Marker>DATABASE</Marker>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
+    </logger>
+
+    <!-- Root logger configuration -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

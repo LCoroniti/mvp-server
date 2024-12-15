@@ -1,5 +1,6 @@
 package com.tus.traunreut.webserver.service.scraper;
 
+import com.tus.traunreut.webserver.log.Markers;
 import com.tus.traunreut.webserver.model.League;
 import com.tus.traunreut.webserver.model.Match;
 import com.tus.traunreut.webserver.model.Team;
@@ -16,6 +17,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,11 +34,12 @@ import java.util.regex.Pattern;
 
 @Component
 public class MatchScraper {
-    private final int DATE_INDEX = 1;
-    private final int TIME_INDEX = 2;
-    private final int HOME_TEAM_INDEX = 5;
-    private final int GUEST_TEAM_INDEX = 6;
-    private final int GOALS_INDEX = 7;
+    private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
+    private static final int DATE_INDEX = 1;
+    private static final int TIME_INDEX = 2;
+    private static final int HOME_TEAM_INDEX = 5;
+    private static final int GUEST_TEAM_INDEX = 6;
+    private static final int GOALS_INDEX = 7;
     private final TeamService teamService;
 
     public MatchScraper(TeamService teamService) {
@@ -47,7 +51,7 @@ public class MatchScraper {
      */
     public List<Match> scrapeMatches(League league) throws IOException {
         Connection connect = Jsoup.connect(league.getLeaguePlanUrl());
-        System.out.println("FETCHING NULIGA INFO FOR " + league.getName());
+        networkLogger.info(Markers.NETWORK, "Fetching all matches for league {} from URL {}", league.getName(), league.getLeaguePlanUrl());
         Document doc = connect.get();
         List<Match> matches = new ArrayList<>();
         Element matchesTable = doc.select("table").last();
@@ -98,7 +102,11 @@ public class MatchScraper {
     public void scrapeMeetingIds(League league, Match match) {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/meetings/" + league.getGroupdId() + "/time/" + now;
-        System.out.println("REQUESTING NULIGA LIVE for " + match.getHomeTeam().getName() + ":"+match.getGuestTeam().getName() + " (" + url+")");
+        networkLogger.info(Markers.NETWORK, "Scraping meetingId from Ticker: {} : {} (League = {})",
+                match.getHomeTeam().getName(),
+                match.getGuestTeam().getName(),
+                match.getHomeTeam().getLeague());
+
         String meetingsJson = getRequest(url);
 
         JSONObject jsonObject = new JSONObject(meetingsJson);
@@ -108,14 +116,14 @@ public class MatchScraper {
 
             String homeTeam = meeting.getString("teamHome");
             String guestTeam = meeting.getString("teamGuest");
-            if (homeTeam.equals(match.getHomeTeam().getName()) && guestTeam.equals(match.getGuestTeam().getName()))
-            {
+            if (homeTeam.equals(match.getHomeTeam().getName()) && guestTeam.equals(match.getGuestTeam().getName())) {
                 match.setNuligaMatchId(meeting.getString("meetingID"));
             }
         }
     }
 
     private String getRequest(String url) {
+        networkLogger.info(Markers.NETWORK, "GET request to {}", url);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             request.setHeader("Accept", "application/json");
@@ -155,8 +163,7 @@ public class MatchScraper {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDate localDate = LocalDate.parse(date, dateFormatter);
         LocalTime localTime = LocalTime.parse(time, timeFormatter);
-        LocalDateTime dateTime = LocalDateTime.of(localDate, localTime);
-        return dateTime;
+        return LocalDateTime.of(localDate, localTime);
     }
 
 }
