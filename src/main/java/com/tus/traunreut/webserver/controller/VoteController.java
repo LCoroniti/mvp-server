@@ -18,9 +18,8 @@ public class VoteController {
     }
 
     @PostMapping
-    public ResponseEntity<String> vote(@RequestParam Long playerId, @RequestParam Long matchId, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
-        if (votingService.vote(playerId, matchId, ipAddress)) {
+    public ResponseEntity<String> vote(@RequestParam Long playerId, @RequestParam Long matchId, @RequestParam String voterToken) {
+        if (votingService.vote(playerId, matchId, voterToken)) {
             return ResponseEntity.ok("Vote accepted");
         } else {
             return ResponseEntity.badRequest().body("Vote already cast");
@@ -28,16 +27,14 @@ public class VoteController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<Long> hasUserVoted(@RequestParam Long matchId, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
-        Optional<Player> player = votingService.getUserVote(matchId, ipAddress);
+    public ResponseEntity<Long> hasUserVoted(@RequestParam Long matchId, @RequestParam String voterToken) {
+        Optional<Player> player = votingService.getUserVote(matchId, voterToken);
         return player.map(value -> ResponseEntity.ok(value.getId())).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteVote(@RequestParam Long matchId, HttpServletRequest request) {
-        String ipAddress = request.getRemoteAddr();
-        votingService.deleteVote(matchId, ipAddress);
+    public ResponseEntity<Void> deleteVote(@RequestParam Long matchId, @RequestParam String voterToken) {
+        votingService.deleteVote(matchId, voterToken);
         return ResponseEntity.ok().build();
     }
 }
