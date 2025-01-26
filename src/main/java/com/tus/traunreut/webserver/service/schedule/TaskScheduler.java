@@ -2,6 +2,8 @@ package com.tus.traunreut.webserver.service.schedule;
 
 import com.tus.traunreut.webserver.util.DateTimeUtil;
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -17,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class TaskScheduler {
+    private static final Logger LOGGER = LoggerFactory.getLogger("CONSOLE");
+
     private static TaskScheduler instance;
     private final ScheduledExecutorService executorService;
     private final Map<Task, ScheduledFuture<?>> scheduledTasks;
@@ -50,6 +54,10 @@ public class TaskScheduler {
                     task.run();
                     removeTask(task);
                 }, delay, TimeUnit.MILLISECONDS);
+                if (scheduledTasks.containsKey(task))
+                {
+                    LOGGER.info("Scheduled task will be overridden. Task id = %s".formatted(task.getId()));
+                }
                 scheduledTasks.put(task, scheduledTask);
             }
         }

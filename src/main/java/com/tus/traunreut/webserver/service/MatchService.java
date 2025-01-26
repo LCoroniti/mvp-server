@@ -8,6 +8,7 @@ import com.tus.traunreut.webserver.model.*;
 import com.tus.traunreut.webserver.repository.MatchPlayerRepository;
 import com.tus.traunreut.webserver.repository.MatchRepository;
 import com.tus.traunreut.webserver.repository.VoteRepository;
+import com.tus.traunreut.webserver.service.schedule.EMatchTasks;
 import com.tus.traunreut.webserver.service.schedule.MatchTask;
 import com.tus.traunreut.webserver.service.schedule.TaskScheduler;
 import com.tus.traunreut.webserver.service.scraper.ScraperService;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 public class MatchService {
     private static final Logger dbLogger = LoggerFactory.getLogger("DATABASE");
+    private static final Logger LOGGER = LoggerFactory.getLogger("CONSOLE");
 
     private final MatchRepository matchRepository;
     private final VoteRepository voteRepository;
@@ -51,8 +53,12 @@ public class MatchService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void onStartup() {
+        LOGGER.info("Updating match information for all leagues...");
         updateAllMatches();
+        LOGGER.info("Finished match updates!");
+        LOGGER.info("Scheduling tasks for each match...");
         scheduleAllMatchTasks();
+        LOGGER.info("On Startup routine finished!");
     }
 
     /**
@@ -65,14 +71,14 @@ public class MatchService {
 
         for (Match upcomingMatch : upcomingMatches) {
             // Scrapes match id and afterward the players for the match
-            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, () -> {
+            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, EMatchTasks.GET_PLAYERS, () -> {
                 scraperService.scrapeMatchId(upcomingMatch.getHomeTeam().getLeague(), upcomingMatch);
                 List<MatchPlayer> matchPlayers = scraperService.getMatchPlayers(upcomingMatch);
                 matchPlayerRepository.saveAll(matchPlayers);
                 matchRepository.save(upcomingMatch);
             }), upcomingMatch.getMatchDate());
             // Scrape the match result
-            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, () -> {
+            TaskScheduler.getInstance().scheduleTask(new MatchTask(upcomingMatch, EMatchTasks.GET_RESULT, () -> {
                 try {
                     Match updated = scraperService.scrapeMatch(upcomingMatch);
                     matchRepository.save(updated);
