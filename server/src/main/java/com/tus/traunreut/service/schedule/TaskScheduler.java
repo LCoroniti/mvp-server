@@ -1,6 +1,7 @@
 package com.tus.traunreut.service.schedule;
 
 import com.tus.traunreut.DateTimeUtil;
+import com.tus.traunreut.ScheduledTask;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,14 +44,14 @@ public class TaskScheduler {
      * @param task to execute
      * @param executionTime of the task
      */
-    public void scheduleTask(Task task, LocalDateTime executionTime) {
+    public void scheduleTask(ScheduledTask task) {
         synchronized (scheduledTasks)
         {
-            long delay = Duration.between(DateTimeUtil.nowGerman(), executionTime).toMillis();
+            long delay = Duration.between(DateTimeUtil.nowGerman(), task.getExecutionTime()).toMillis();
             if (delay > 0) {
                 ScheduledFuture<?> scheduledTask = executorService.schedule(() -> {
-                    task.run();
-                    removeTask(task);
+                    task.execute();
+//                    removeTask(task);
                 }, delay, TimeUnit.MILLISECONDS);
                 if (scheduledTasks.containsKey(task))
                 {

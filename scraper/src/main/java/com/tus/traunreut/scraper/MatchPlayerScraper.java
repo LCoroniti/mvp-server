@@ -15,10 +15,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MatchPlayerScraper {
+public class MatchPlayerScraper extends AbstractScraper<List<MatchPlayer>> {
+    private final Match match;
+
+    public MatchPlayerScraper(Match match)
+    {
+        this.match = match;
+    }
+
     private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
 
-    public List<MatchPlayer> getMatchPlayers(Match match) throws IOException {
+    @Override
+    public List<MatchPlayer> fetchData() {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/time/" + now;
         String playersJson = getRequest(url);
@@ -44,24 +52,5 @@ public class MatchPlayerScraper {
             result.add(matchPlayer);
         }
         return result;
-    }
-
-    private String getRequest(String url) {
-        networkLogger.info(Markers.NETWORK,"GET request to {}", url);
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url);
-            request.setHeader("Accept", "application/json");
-
-            return client.execute(request, response -> {
-                int statusCode = response.getCode();
-                if (statusCode >= 200 && statusCode < 300) {
-                    return EntityUtils.toString(response.getEntity());
-                } else {
-                    throw new IOException("Unexpected response status: " + statusCode);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

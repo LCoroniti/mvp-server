@@ -60,6 +60,7 @@ public class MatchScraper {
                     continue;
                 }
                 match.setMatchDate(matchDate);
+                // Code below must be moved to UpdateAllMatchesTask. Here: Just create all matches fetched from nuliga and return the list
 //                Team home = teamService.getTeamByNameAndLeague(homeTeam, league.getName()).orElse(null);
 //                Team guest = teamService.getTeamByNameAndLeague(guestTeam, league.getName()).orElse(null);
 //                if (home == null || guest == null) {
