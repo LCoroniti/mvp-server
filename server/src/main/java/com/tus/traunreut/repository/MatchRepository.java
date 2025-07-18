@@ -34,5 +34,12 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             LocalDateTime date, String leagueName, Pageable pageable);
 
     Optional<Match> findByHomeTeamAndGuestTeam(Team homeTeam, Team guestTeam);
+
+    @Query("""
+        SELECT m FROM Match m
+        WHERE m.homeTeam.league.id = :leagueId
+           AND m.guestTeam.league.id = :leagueId
+    """)
+    List<Match> findByLeagueId(@Param("leagueId") Long leagueId);
 }
 

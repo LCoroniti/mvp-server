@@ -1,11 +1,16 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "leagues")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class League {
 
     @Id
@@ -23,58 +28,7 @@ public class League {
     private String groupdId;
 
     @Column
-    private boolean isActive;
-
-    public League(Long id, String name, String leaguePlanUrl, String groupdId, boolean isActive) {
-        this.id = id;
-        this.name = name;
-        this.leaguePlanUrl = leaguePlanUrl;
-        this.groupdId = groupdId;
-        this.isActive = isActive;
-    }
-
-    public League() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLeaguePlanUrl() {
-        return leaguePlanUrl;
-    }
-
-    public void setLeaguePlanUrl(String leaguePlanUrl) {
-        this.leaguePlanUrl = leaguePlanUrl;
-    }
-
-    public String getGroupdId() {
-        return groupdId;
-    }
-
-    public void setGroupdId(String groupdId) {
-        this.groupdId = groupdId;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
+    private String season;
 
     @Override
     public boolean equals(Object o) {

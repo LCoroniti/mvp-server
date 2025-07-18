@@ -1,38 +1,22 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.Embeddable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MatchPlayerId implements Serializable {
     private Long matchId;
     private Long playerId;
-
-    public MatchPlayerId(Long matchId, Long playerId) {
-        this.matchId = matchId;
-        this.playerId = playerId;
-    }
-
-    public MatchPlayerId() {
-    }
-
-    public Long getMatchId() {
-        return matchId;
-    }
-
-    public void setMatchId(Long matchId) {
-        this.matchId = matchId;
-    }
-
-    public Long getPlayerId() {
-        return playerId;
-    }
-
-    public void setPlayerId(Long playerId) {
-        this.playerId = playerId;
-    }
 
     @Override
     public boolean equals(Object o) {

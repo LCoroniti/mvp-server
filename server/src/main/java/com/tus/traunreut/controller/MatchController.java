@@ -33,9 +33,12 @@ public class MatchController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Match>> getAllMatches() {
-        List<Match> matches = matchService.getAllMatches();
-        return new ResponseEntity<>(matches, HttpStatus.OK);
+    public ResponseEntity<List<Match>> getAllMatches(@RequestParam(required = false) Long leagueId) {
+        if (leagueId == null) {
+            return new ResponseEntity<>(matchService.getAllMatches(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(matchService.getAllMatchesFromLeague(leagueId), HttpStatus.OK);
+        }
     }
 
     @GetMapping("/past")
@@ -144,8 +147,7 @@ public class MatchController {
     }
 
     @GetMapping("/{matchId}")
-    public ResponseEntity<VotingMatchDto> getMatch(@PathVariable Long matchId)
-    {
+    public ResponseEntity<VotingMatchDto> getMatch(@PathVariable Long matchId) {
         Optional<Match> idMatch = matchService.getMatchById(matchId);
         if (idMatch.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.OK);
@@ -164,5 +166,11 @@ public class MatchController {
             return ResponseEntity.internalServerError().build();
         }
         return new ResponseEntity<>(new VotingMatchDto(match, homeTeamLogo, guestTeamLogo), HttpStatus.OK);
+    }
+
+    @PutMapping("/{matchId}")
+    public ResponseEntity<Match> updateMatch(@PathVariable Long matchId, @RequestBody Match matchDetails) {
+        Match updatedMatch = matchService.updateMatch(matchId, matchDetails);
+        return ResponseEntity.ok(updatedMatch);
     }
 }

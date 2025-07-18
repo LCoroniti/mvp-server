@@ -12,8 +12,12 @@ import com.tus.traunreut.service.schedule.EMatchTasks;
 import com.tus.traunreut.service.schedule.MatchTask;
 import com.tus.traunreut.service.schedule.TaskScheduler;
 import jakarta.transaction.Transactional;
+import org.javers.core.Javers;
+import org.javers.core.diff.Diff;
+import org.javers.core.diff.changetype.ValueChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -26,10 +30,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +43,9 @@ public class MatchService {
     private final MatchPlayerRepository matchPlayerRepository;
     private final LeagueRepository leagueRepository;
     private final ScraperService scraperService;
+
+    @Autowired
+    private Javers javers;
 
     public MatchService(MatchRepository matchRepository, VoteRepository voteRepository, MatchPlayerRepository matchPlayerRepository, LeagueRepository leagueRepository) {
         this.matchRepository = matchRepository;
@@ -101,7 +105,7 @@ public class MatchService {
                 Optional<Match> persistentMatch = getMatch(match.getHomeTeam(), match.getGuestTeam());
                 if (persistentMatch.isEmpty()) {
                     matchRepository.save(match);
-                } else if (match.hasReport() && !persistentMatch.get().hasReport()) {
+                } else if (match.isHasReport() && !persistentMatch.get().isHasReport()) {
                     match.setId(persistentMatch.get().getId());
                     matchRepository.save(match);
                 }
@@ -147,6 +151,10 @@ public class MatchService {
 
     public List<Match> getAllMatches() {
         return matchRepository.findAll();
+    }
+
+    public List<Match> getAllMatchesFromLeague(Long leagueId) {
+        return matchRepository.findByLeagueId(leagueId);
     }
 
     public Optional<Match> getNextMatch() {
@@ -241,5 +249,28 @@ public class MatchService {
 
     public Optional<Match> getMatch(Team homeTeam, Team guestTeam) {
         return matchRepository.findByHomeTeamAndGuestTeam(homeTeam, guestTeam);
+    }
+
+    @Transactional
+    public Match updateMatch(Long id, Match updatedMatchDetails) {
+        Match existingMatch = matchRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Match not found with id: " + id));
+
+        Diff diff = javers.compare(existingMatch, updatedMatchDetails);
+
+        if (diff.hasChanges()) {
+            dbLogger.info(Markers.DATABASE, "Updating Match ID {}. Changes: {}", id, diff.getChangesByType(ValueChange.class));
+
+            existingMatch.setMatchDate(updatedMatchDetails.getMatchDate());
+            existingMatch.setHomeTeam(updatedMatchDetails.getHomeTeam());
+            existingMatch.setGuestTeam(updatedMatchDetails.getGuestTeam());
+            existingMatch.setHomeGoals(updatedMatchDetails.getHomeGoals());
+            existingMatch.setGuestGoals(updatedMatchDetails.getGuestGoals());
+            existingMatch.setNuligaMatchId(updatedMatchDetails.getNuligaMatchId());
+
+            return matchRepository.save(existingMatch);
+        } else {
+            return existingMatch;
+        }
     }
 }

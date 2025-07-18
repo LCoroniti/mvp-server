@@ -1,13 +1,20 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "genders")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Gender {
-
     @Id
     @Column(name = "gender_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,30 +22,6 @@ public class Gender {
 
     @Column(name = "name")
     private String name;
-
-    public Gender(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Gender() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String gender) {
-        this.name = gender;
-    }
 
     @Override
     public boolean equals(Object o) {

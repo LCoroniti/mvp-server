@@ -1,13 +1,20 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "players")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Player {
-
     @Id
     @Column(name = "player_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,48 +29,6 @@ public class Player {
     @ManyToOne
     @JoinColumn(name = "team_id", referencedColumnName = "team_id")
     private Team team;
-
-    public Player(Long id, String firstName, String surname, Team team) {
-        this.id = id;
-        this.firstName = firstName;
-        this.surname = surname;
-        this.team = team;
-    }
-
-    public Player() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String name) {
-        this.firstName = name;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
 
     @Override
     public boolean equals(Object o) {

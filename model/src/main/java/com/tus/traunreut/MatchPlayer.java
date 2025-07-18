@@ -2,11 +2,19 @@ package com.tus.traunreut;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "matchplayers")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MatchPlayer {
     @EmbeddedId
     private MatchPlayerId id;
@@ -24,48 +32,6 @@ public class MatchPlayer {
 
     @Column(name = "jersey_number")
     private int jerseyNumber;
-
-    public MatchPlayer(Match match, Player player, int jerseyNumber) {
-        this.match = match;
-        this.player = player;
-        this.jerseyNumber = jerseyNumber;
-        this.id = new MatchPlayerId(match.getId(), player.getId());
-    }
-
-    public MatchPlayer() {
-    }
-
-    public MatchPlayerId getId() {
-        return id;
-    }
-
-    public void setId(MatchPlayerId id) {
-        this.id = id;
-    }
-
-    public Match getMatch() {
-        return match;
-    }
-
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    public int getJerseyNumber() {
-        return jerseyNumber;
-    }
-
-    public void setJerseyNumber(int jerseyNumber) {
-        this.jerseyNumber = jerseyNumber;
-    }
 
     @Override
     public boolean equals(Object o) {

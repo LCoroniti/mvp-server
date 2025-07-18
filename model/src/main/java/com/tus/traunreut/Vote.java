@@ -1,11 +1,19 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "votes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vote {
 
     @Id
@@ -23,54 +31,6 @@ public class Vote {
 
     @Column(name = "voter_id")
     private int voterId;
-
-    public Vote(Long id, Match match, Player player, int voterId) {
-        this.id = id;
-        this.match = match;
-        this.player = player;
-        this.voterId = voterId;
-    }
-
-    public Vote(Match match, Player player, int voterId) {
-        this.match = match;
-        this.player = player;
-        this.voterId = voterId;
-    }
-
-    public Vote() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Match getMatch() {
-        return match;
-    }
-
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    public int getVoterId() {
-        return voterId;
-    }
-
-    public void setVoterId(int voterId) {
-        this.voterId = voterId;
-    }
 
     @Override
     public boolean equals(Object o) {

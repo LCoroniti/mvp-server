@@ -1,11 +1,19 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "clubs")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Club {
 
     @Id
@@ -18,39 +26,6 @@ public class Club {
 
     @Column(name = "logo")
     private String logoUrl;
-
-    public Club(Long id, String name, String logoUrl) {
-        this.id = id;
-        this.name = name;
-        this.logoUrl = logoUrl;
-    }
-
-    public Club() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
 
     @Override
     public boolean equals(Object o) {
