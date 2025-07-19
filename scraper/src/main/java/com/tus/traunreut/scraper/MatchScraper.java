@@ -26,18 +26,23 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MatchScraper {
+public class MatchScraper extends AbstractScraper<List<Match>> {
     private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
     private static final int DATE_INDEX = 1;
     private static final int TIME_INDEX = 2;
     private static final int HOME_TEAM_INDEX = 5;
     private static final int GUEST_TEAM_INDEX = 6;
     private static final int GOALS_INDEX = 7;
+    private final League league;
 
+    public MatchScraper (League league) {
+        this.league = league;
+    }
     /**
      * Fetch all matches for the league which is represented in the url.
      */
-    public List<Match> scrapeMatches(League league) throws IOException {
+    @Override
+    public List<Match> fetchData() throws IOException {
         Connection connect = Jsoup.connect(league.getLeaguePlanUrl());
         networkLogger.info(Markers.NETWORK, "Fetching all matches for league {} from URL {}", league.getName(), league.getLeaguePlanUrl());
         Document doc = connect.get();
@@ -83,51 +88,6 @@ public class MatchScraper {
             }
         }
         return matches;
-    }
-
-    /**
-     * Scrape the meeting id for the given match
-     */
-    public void scrapeMeetingIds(League league, Match match) {
-        long now = DateTimeUtil.nowGermanSecondsRounded();
-        String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/meetings/" + league.getGroupdId() + "/time/" + now;
-        networkLogger.info(Markers.NETWORK, "Scraping meetingId from Ticker: {} : {} (League = {})",
-                match.getHomeTeam().getName(),
-                match.getGuestTeam().getName(),
-                match.getHomeTeam().getLeague());
-
-        String meetingsJson = getRequest(url);
-
-        JSONObject jsonObject = new JSONObject(meetingsJson);
-        JSONArray meetings = jsonObject.getJSONArray("meetings");
-        for (int i = 0; i < meetings.length(); i++) {
-            JSONObject meeting = meetings.getJSONObject(i);
-
-            String homeTeam = meeting.getString("teamHome");
-            String guestTeam = meeting.getString("teamGuest");
-            if (homeTeam.equals(match.getHomeTeam().getName()) && guestTeam.equals(match.getGuestTeam().getName())) {
-                match.setNuligaMatchId(meeting.getString("meetingID"));
-            }
-        }
-    }
-
-    private String getRequest(String url) {
-        networkLogger.info(Markers.NETWORK, "GET request to {}", url);
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpGet request = new HttpGet(url);
-            request.setHeader("Accept", "application/json");
-
-            return client.execute(request, response -> {
-                int statusCode = response.getCode();
-                if (statusCode >= 200 && statusCode < 300) {
-                    return EntityUtils.toString(response.getEntity());
-                } else {
-                    throw new IOException("Unexpected response status: " + statusCode);
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private String getMeetingNumber(String htmlElement) {
