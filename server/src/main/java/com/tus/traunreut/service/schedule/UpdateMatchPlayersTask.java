@@ -1,6 +1,7 @@
 
 package com.tus.traunreut.service.schedule;
 
+import com.tus.traunreut.MatchPlayer;
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.scraper.MatchPlayerScraper;
 import com.tus.traunreut.Player;
@@ -29,7 +30,7 @@ public class UpdateMatchPlayersTask extends ScheduledTask {
     public void execute() {
         try {
             // Step 1: Fetch players for the match
-            List<Player> players = matchPlayerScraper.fetchData();
+            List<MatchPlayer> players = matchPlayerScraper.fetchData();
             if (players != null && !players.isEmpty()) {
                 // Step 2: Update players in the database
                 players.forEach(player -> playerRepository.saveOrUpdate(player));

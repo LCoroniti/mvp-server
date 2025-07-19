@@ -30,6 +30,7 @@ public class MatchPlayerScraper extends AbstractScraper<List<MatchPlayer>> {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/time/" + now;
         String playersJson = getRequest(url);
+        //TODO: move to MatchPlayerParsingService?
         JSONObject jsonObject = new JSONObject(playersJson);
         JSONArray matchPlayers = jsonObject.getJSONArray("meetingPersons");
         List<MatchPlayer> result = new ArrayList<>();
