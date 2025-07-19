@@ -54,13 +54,22 @@ public class MatchIDScraper extends AbstractScraper<String> {
             String guestTeam = meeting.getString("teamGuest");
             if (homeTeam.equals(match.getHomeTeam().getName()) && guestTeam.equals(match.getGuestTeam().getName())) {
                 return meeting.getString("meetingID");
-                //match.setNuligaMatchId(meeting.getString("meetingID"));
             }
         }
         networkLogger.warn(Markers.NETWORK, "No meetingId found for match: {} : {} (League = {})",
                 match.getHomeTeam().getName(),
                 match.getGuestTeam().getName(),
                 match.getHomeTeam().getLeague());
+        return null;
+    }
+
+    //TODO: what was this used for?
+    private String getMeetingNumber(String htmlElement) {
+        Pattern pattern = Pattern.compile("meeting=(\\d+)&amp");
+        Matcher matcher = pattern.matcher(htmlElement);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
         return null;
     }
 
