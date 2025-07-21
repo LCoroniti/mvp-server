@@ -1,5 +1,7 @@
 package com.tus.traunreut;
 
+import com.tus.traunreut.scraper.DataFetchException;
+
 public interface IScraper<T> {
-    T fetchData();
+    T fetchData() throws DataFetchException;
 }

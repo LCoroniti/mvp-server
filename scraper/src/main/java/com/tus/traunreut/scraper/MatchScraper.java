@@ -14,6 +14,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class MatchScraper extends AbstractScraper<List<Element>> {
     private static final int HOME_TEAM_INDEX = 5;
     private static final int GUEST_TEAM_INDEX = 6;
     private static final int GOALS_INDEX = 7;
-    private static final League league;
+    private final League league;
 
     public MatchScraper (League league) {
         this.league = league;
@@ -42,16 +43,20 @@ public class MatchScraper extends AbstractScraper<List<Element>> {
      * Fetch all matches for the league which is represented in the url.
      */
     @Override
-    public static List<Element> fetchData() throws IOException {
+    public List<Element> fetchData() throws DataFetchException {
         Connection connect = Jsoup.connect(league.getLeaguePlanUrl());
         networkLogger.info(Markers.NETWORK, "Fetching all matches for league {} from URL {}", league.getName(), league.getLeaguePlanUrl());
-        Document doc = connect.get();
+        Document doc;
+        try {
+            doc = connect.get();
+        } catch (IOException e) {
+            networkLogger.error("Failed to establish connection for URL {}", league.getLeaguePlanUrl());
+            throw new DataFetchException("Connection could not be established", e);
+        }
         Element matchesTable = doc.select("table").last();
         if (matchesTable != null) {
             return matchesTable.select("tr").subList(1, matchesTable.select("tr").size()); // Skip header row
         }
         return new ArrayList<>();
     }
-
-
 }

@@ -1,31 +1,40 @@
 package com.tus.traunreut.service.schedule;
 
-import com.tus.traunreut.League;
-import com.tus.traunreut.ScheduledTask;
+import com.tus.traunreut.*;
 import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.scraper.MatchIDScraper;
 import com.tus.traunreut.scraper.MatchScraper;
-import com.tus.traunreut.Match;
-import com.tus.traunreut.service.schedule.ETaskIds;
 import com.tus.traunreut.service.MatchParsingService;
 import com.tus.traunreut.repository.MatchRepository;
 
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class UpdateAllMatchesTask extends ScheduledTask {
     //TODO: move Logger to e.g ScheduledTask so that each task uses the same logger
     private static final Logger databaseLogger = LoggerFactory.getLogger("DATABASE");
     private final MatchRepository matchRepository;
-    private MatchParsingService matchParsingService;
-    private League league;
-    public UpdateAllMatchesTask() {
-        this.matchRepository = MatchRepository.getInstance();
+    private final LeagueRepository leagueRepository;
+    private final MatchParsingService matchParsingService;
+    private final ScraperFactory scraperFactory;
+
+    @Autowired
+    public UpdateAllMatchesTask(MatchRepository matchRepository,
+                                LeagueRepository leagueRepository,
+                                MatchParsingService matchParsingService,
+                                ScraperFactory scraperFactory
+    ) {
+        this.matchRepository = matchRepository;
+        this.matchParsingService = matchParsingService;
+        this.leagueRepository = leagueRepository;
+        this.scraperFactory = scraperFactory;
         setTaskId(ETaskIds.UPDATE_ALL_MATCHES.getId());
     }
 
@@ -39,15 +48,20 @@ public class UpdateAllMatchesTask extends ScheduledTask {
 
         try {
             //for each league:
-            List<String> leagues = LeagueRepository.findDistinctLeagueNames();
+            List<String> leagues = leagueRepository.findDistinctLeagueNames();
             if (leagues == null || leagues.isEmpty()) {
                 databaseLogger.warn("No leagues found in the database. Cannot update matches.");
                 return;
             }
             for (String leagueName : leagues) {
                 // Step 1: Fetch raw table rows using MatchScraper
-                league = LeagueRepository.findByName(leagueName);
-                MatchScraper matchScraper = MatchScraper.getInstance(leagueName);
+                Optional<League> optLeague = leagueRepository.findByName(leagueName);
+                if (optLeague.isEmpty())
+                {
+                    continue;
+                }
+                League league = optLeague.get();
+                IScraper<List<Element>> matchScraper = scraperFactory.createMatchScraper(league);
                 List<Element> rows = matchScraper.fetchData();
                 //rows is the table -> needs to be parse see MatchScraper commented code
                 // Step 2: Parse the rows into Match entities

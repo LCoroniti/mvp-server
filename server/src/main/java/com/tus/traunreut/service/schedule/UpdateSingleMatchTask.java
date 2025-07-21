@@ -1,4 +1,4 @@
-UpdateAllMatchesTaskpackage com.tus.traunreut.service.schedule;
+package com.tus.traunreut.service.schedule;
 
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.service.schedule.ETaskIds;
