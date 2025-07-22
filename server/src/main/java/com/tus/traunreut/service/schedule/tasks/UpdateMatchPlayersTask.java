@@ -1,19 +1,20 @@
 
-package com.tus.traunreut.service.schedule;
+package com.tus.traunreut.service.schedule.tasks;
 
 import com.tus.traunreut.MatchPlayer;
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.scraper.MatchPlayerScraper;
-import com.tus.traunreut.Player;
 import com.tus.traunreut.repository.PlayerRepository;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+@Entity
+@DiscriminatorValue("2")
 public class UpdateMatchPlayersTask extends ScheduledTask {
     //TODO: move Logger to e.g ScheduledTask so that each task uses the same logger
     private static final Logger databaseLogger = LoggerFactory.getLogger("DATABASE");
@@ -25,7 +26,6 @@ public class UpdateMatchPlayersTask extends ScheduledTask {
     public UpdateMatchPlayersTask(PlayerRepository playerRepository, MatchPlayerScraper matchPlayerScraper) {
         this.playerRepository = playerRepository;
         this.matchPlayerScraper = matchPlayerScraper;
-        setTaskId(ETaskIds.UPDATE_MATCH_PLAYERS.getId());
     }
 
     // This task should run in the beginning of a match if the data is available otherwise try every 5 minutes??

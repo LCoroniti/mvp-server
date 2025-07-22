@@ -1,22 +1,23 @@
-package com.tus.traunreut.service.schedule;
+package com.tus.traunreut.service.schedule.tasks;
 
 import com.tus.traunreut.*;
 import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.scraper.MatchIDScraper;
-import com.tus.traunreut.scraper.MatchScraper;
 import com.tus.traunreut.service.MatchParsingService;
 import com.tus.traunreut.repository.MatchRepository;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Entity
+@DiscriminatorValue("1")
 public class UpdateAllMatchesTask extends ScheduledTask {
     //TODO: move Logger to e.g ScheduledTask so that each task uses the same logger
     private static final Logger databaseLogger = LoggerFactory.getLogger("DATABASE");
@@ -35,10 +36,7 @@ public class UpdateAllMatchesTask extends ScheduledTask {
         this.matchParsingService = matchParsingService;
         this.leagueRepository = leagueRepository;
         this.scraperFactory = scraperFactory;
-        setTaskId(ETaskIds.UPDATE_ALL_MATCHES.getId());
     }
-
-
 
     // This task should run at the start up of the server and once a week
     @Override

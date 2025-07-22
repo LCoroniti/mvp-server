@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduledTask {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "task_id", discriminatorType = DiscriminatorType.INTEGER)
+public abstract class ScheduledTask {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +33,5 @@ public class ScheduledTask {
     @Column(name = "match_id")
     private String matchId;
 
-    public void execute() {
-
-    }
+    public abstract void execute();
 }

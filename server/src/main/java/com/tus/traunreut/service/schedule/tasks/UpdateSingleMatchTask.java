@@ -1,13 +1,12 @@
-package com.tus.traunreut.service.schedule;
+package com.tus.traunreut.service.schedule.tasks;
 
 import com.tus.traunreut.ScheduledTask;
-import com.tus.traunreut.service.schedule.ETaskIds;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
+@Entity
+@DiscriminatorValue("3")
 public class UpdateSingleMatchTask extends ScheduledTask {
-    public UpdateSingleMatchTask() {
-        setTaskId(ETaskIds.UPDATE_SINGLE_MATCH.getId());
-    }
-
     @Override
     public void execute() {
         // get match by ID, fetch data of the match, update

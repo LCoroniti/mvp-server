@@ -1,14 +1,8 @@
 package com.tus.traunreut.service;
 
-import com.tus.traunreut.DateTimeUtil;
-import com.tus.traunreut.Match;
-import com.tus.traunreut.MatchPlayer;
 import com.tus.traunreut.ScheduledTask;
-import com.tus.traunreut.service.schedule.EMatchTasks;
-import com.tus.traunreut.service.schedule.MatchTask;
 import com.tus.traunreut.service.schedule.TaskScheduler;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ScheduleService {
