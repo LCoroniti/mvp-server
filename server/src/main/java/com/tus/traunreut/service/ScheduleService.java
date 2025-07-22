@@ -1,7 +1,7 @@
 package com.tus.traunreut.service;
 
 import com.tus.traunreut.ScheduledTask;
-import com.tus.traunreut.service.schedule.TaskScheduler;
+import com.tus.traunreut.service.schedule.TaskSchedulingService;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class ScheduleService {
     }
 
     public void scheduleTask(ScheduledTask taskToSchedule){
-        TaskScheduler.getInstance().scheduleTask(...);
+        TaskSchedulingService.getInstance().scheduleTask(...);
     }
 
     //    @EventListener(ApplicationReadyEvent.class)

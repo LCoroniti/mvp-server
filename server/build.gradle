@@ -16,4 +16,7 @@ dependencies {
     implementation project(':util')
     implementation project(':scraper')
     implementation project(':log')
+
+    compileOnly  'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
