@@ -1,10 +1,8 @@
 package com.tus.traunreut;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
@@ -12,24 +10,21 @@ import java.time.LocalDateTime;
 @Table(name = "scheduled_tasks")
 @Getter
 @Setter
-@NoArgsConstructor
+@RequiredArgsConstructor
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "task_id", discriminatorType = DiscriminatorType.INTEGER)
 public abstract class ScheduledTask {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
+    @SequenceGenerator(name = "task_seq", sequenceName = "task_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "task_id")
-    private int taskId;
-
     @Column(name = "timestamp")
+    @NonNull
     private LocalDateTime executionTime;
 
     @Column(name = "match_id")
     private String matchId;
-
-    public abstract void execute();
 }
