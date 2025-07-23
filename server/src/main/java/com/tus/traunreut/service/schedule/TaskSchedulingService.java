@@ -1,12 +1,15 @@
 package com.tus.traunreut.service.schedule;
 
 import com.tus.traunreut.ScheduledTask;
+import com.tus.traunreut.events.InitializeScheduledTasksEvent;
 import com.tus.traunreut.repository.ScheduledTaskRepository;
-import jakarta.annotation.PostConstruct;
+import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
+import com.tus.traunreut.service.schedule.executors.TaskExecutorRegistry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,13 +29,13 @@ public class TaskSchedulingService {
 
     private final ScheduledTaskRepository repository;
     private final TaskScheduler taskScheduler;
+    private final TaskExecutorRegistry taskExecutorRegistry;
 
     // Keep track of scheduled futures for canceling
     private final Map<Long, ScheduledTaskInfo> scheduledTasks = new ConcurrentHashMap<>();
 
-    // TODO: When a service is added to update/add scheduled tasks on startup, create a custom ApplicationEvent and use @EventListener public void onTasksUpdated(TasksUpdatedEvent event) ... (if the custom event is named TasksUpdatedEvent)
-    @PostConstruct
-    public void init() {
+    @EventListener
+    public void handleInitializeScheduledTasks(InitializeScheduledTasksEvent event) {
         List<ScheduledTask> tasks = repository.findByExecutionTimeAfter(LocalDateTime.now());
         LOGGER.info("Scheduling {} tasks on startup", tasks.size());
 
@@ -113,8 +116,13 @@ public class TaskSchedulingService {
     @Transactional
     public void executeAndRemove(ScheduledTask task) {
         try {
-            LOGGER.info("Executing task {}", task.getId());
-            task.execute();
+            ScheduledTaskExecutor<ScheduledTask> executor = taskExecutorRegistry.getExecutor(task);
+            if (executor != null) {
+                LOGGER.info("Executing task {}", task.getId());
+                executor.execute(task);
+            } else {
+                LOGGER.warn("No executor found for task {}", task.getId());
+            }
             repository.deleteById(task.getId());
             scheduledTasks.remove(task.getId());
         } catch (Exception e) {
@@ -137,12 +145,14 @@ public class TaskSchedulingService {
      * @param taskId the ID of the scheduled task to cancel
      * @return true if the task was found and cancelled, false otherwise
      */
+    @Transactional
     public boolean cancelScheduledTask(Long taskId) {
         ScheduledTaskInfo info = scheduledTasks.remove(taskId);
         if (info != null) {
             boolean cancelled = info.future().cancel(false);
             if (cancelled) {
                 LOGGER.info("Cancelled scheduled task {}", taskId);
+                repository.deleteById(taskId);
             } else {
                 LOGGER.warn("Failed to cancel scheduled task {}", taskId);
             }
@@ -151,5 +161,9 @@ public class TaskSchedulingService {
             LOGGER.warn("No scheduled task found with id {}", taskId);
             return false;
         }
+    }
+
+    Map<Long, ScheduledTaskInfo> getScheduledTasks() {
+        return Collections.unmodifiableMap(scheduledTasks);
     }
 }

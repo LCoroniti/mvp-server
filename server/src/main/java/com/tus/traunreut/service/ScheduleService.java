@@ -8,14 +8,14 @@ import java.util.List;
 public class ScheduleService {
 
 
-    public List<ScheduledTask> getAllTasks(){
-        // get all tasks from repo
-        // read task id and cast to correct object. Switch over ETaskIds
-    }
-
-    public void scheduleTask(ScheduledTask taskToSchedule){
-        TaskSchedulingService.getInstance().scheduleTask(...);
-    }
+//    public List<ScheduledTask> getAllTasks(){
+//        // get all tasks from repo
+//        // read task id and cast to correct object. Switch over ETaskIds
+//    }
+//
+//    public void scheduleTask(ScheduledTask taskToSchedule){
+//        TaskSchedulingService.getInstance().scheduleTask(...);
+//    }
 
     //    @EventListener(ApplicationReadyEvent.class)
 //    public void onStartup() {
