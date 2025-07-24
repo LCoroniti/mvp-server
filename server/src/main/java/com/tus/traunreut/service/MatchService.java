@@ -54,23 +54,23 @@ public class MatchService {
      * Fetches all matches from nuliga and updates the existing matches.
      * Removes canceled matches from the database.
      */
-    public void updateAllMatches() {
-        try {
-            List<Match> scrapedMatches = scraperService.scrapeMatches(leagueRepository.findAll());
-            removeCanceledMatchers(scrapedMatches);
-            for (Match match : scrapedMatches) {
-                Optional<Match> persistentMatch = getMatch(match.getHomeTeam(), match.getGuestTeam());
-                if (persistentMatch.isEmpty()) {
-                    matchRepository.save(match);
-                } else if (match.isHasReport() && !persistentMatch.get().isHasReport()) {
-                    match.setId(persistentMatch.get().getId());
-                    matchRepository.save(match);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public void updateAllMatches() {
+//        try {
+//            List<Match> scrapedMatches = scraperService.scrapeMatches(leagueRepository.findAll());
+//            removeCanceledMatchers(scrapedMatches);
+//            for (Match match : scrapedMatches) {
+//                Optional<Match> persistentMatch = getMatch(match.getHomeTeam(), match.getGuestTeam());
+//                if (persistentMatch.isEmpty()) {
+//                    matchRepository.save(match);
+//                } else if (match.isHasReport() && !persistentMatch.get().isHasReport()) {
+//                    match.setId(persistentMatch.get().getId());
+//                    matchRepository.save(match);
+//                }
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     /**
      * Remove matches that are in the db but are not present in the scraped matches.

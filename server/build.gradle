@@ -16,4 +16,9 @@ dependencies {
     implementation project(':util')
     implementation project(':scraper')
     implementation project(':log')
+
+    testImplementation 'com.h2database:h2'
+
+    compileOnly  'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }

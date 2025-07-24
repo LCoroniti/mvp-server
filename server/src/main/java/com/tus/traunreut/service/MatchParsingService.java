@@ -50,8 +50,8 @@ public class MatchParsingService {
                 String[] parts = goals.split(":");
                 int homeGoals = Integer.parseInt(parts[0].trim());
                 int guestGoals = Integer.parseInt(parts[1].trim());
-                String meetingNbr = getMeetingNumber(cells.get(GOALS_INDEX).toString());
-                match.setNuligaMatchId(meetingNbr);
+//                String meetingNbr = getMeetingNumber(cells.get(GOALS_INDEX).toString());
+//                match.setNuligaMatchId(meetingNbr);
                 match.setHomeGoals(homeGoals);
                 match.setGuestGoals(guestGoals);
                 match.setHasReport(true);
