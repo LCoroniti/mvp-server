@@ -62,15 +62,4 @@ public class MatchIDScraper extends AbstractScraper<String> {
                 match.getHomeTeam().getLeague());
         return null;
     }
-
-    //TODO: what was this used for?
-    private String getMeetingNumber(String htmlElement) {
-        Pattern pattern = Pattern.compile("meeting=(\\d+)&amp");
-        Matcher matcher = pattern.matcher(htmlElement);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
 }
