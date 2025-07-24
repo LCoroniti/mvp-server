@@ -3,6 +3,7 @@ package com.tus.traunreut.service;
 import com.tus.traunreut.League;
 import com.tus.traunreut.Match;
 import com.tus.traunreut.Team;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.tus.traunreut.Markers.INTERNAL;
+import static com.tus.traunreut.Markers.INTERNAL_LOG;
 
 @Service
+@RequiredArgsConstructor
 public class MatchParsingService {
     private static final int DATE_INDEX = 1;
     private static final int TIME_INDEX = 2;
@@ -48,13 +55,18 @@ public class MatchParsingService {
             String goals = clearWhitespaces(cells.get(GOALS_INDEX).text());
             if (!goals.isBlank()) {
                 String[] parts = goals.split(":");
-                int homeGoals = Integer.parseInt(parts[0].trim());
-                int guestGoals = Integer.parseInt(parts[1].trim());
-//                String meetingNbr = getMeetingNumber(cells.get(GOALS_INDEX).toString());
-//                match.setNuligaMatchId(meetingNbr);
-                match.setHomeGoals(homeGoals);
-                match.setGuestGoals(guestGoals);
-                match.setHasReport(true);
+                try {
+                    int homeGoals = Integer.parseInt(parts[0].trim());
+                    int guestGoals = Integer.parseInt(parts[1].trim());
+                    String meetingNbr = getMeetingNumber(cells.get(GOALS_INDEX).toString());
+                    match.setNuligaMatchId(meetingNbr);
+                    match.setHomeGoals(homeGoals);
+                    match.setGuestGoals(guestGoals);
+                    match.setHasReport(true);
+                } catch (NumberFormatException e)
+                {
+                    INTERNAL_LOG.error(INTERNAL, "Error while trying to parse the goals from HMTL value: {}", goals, e);
+                }
             }
             matches.add(match);
         }
@@ -75,5 +87,14 @@ public class MatchParsingService {
         LocalDate localDate = LocalDate.parse(date, dateFormatter);
         LocalTime localTime = LocalTime.parse(time, timeFormatter);
         return LocalDateTime.of(localDate, localTime);
+    }
+
+    private String getMeetingNumber(String htmlElement) {
+        Pattern pattern = Pattern.compile("meeting=(\\d+)&amp");
+        Matcher matcher = pattern.matcher(htmlElement);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 }
