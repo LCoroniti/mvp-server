@@ -29,7 +29,7 @@ public class MatchParsingService {
     private static final int HOME_TEAM_INDEX = 5;
     private static final int GUEST_TEAM_INDEX = 6;
     private static final int GOALS_INDEX = 7;
-    private TeamService teamService;
+    private final TeamService teamService;
 
     public List<Match> parseTableData(List<Element> rows, League league) {
         List<Match> matches = new ArrayList<>();

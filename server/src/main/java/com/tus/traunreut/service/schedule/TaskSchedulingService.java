@@ -58,7 +58,7 @@ public class TaskSchedulingService {
         );
         scheduledTasks.put(task.getId(), new ScheduledTaskInfo(future, executionInstant));
 
-        LOGGER.info("Task {} scheduled to run at {}", task.getId(), task.getExecutionTime());
+        LOGGER.info("{} (Task ID: {}) scheduled to run at {}", task.getClass().getSimpleName(), task.getId(), task.getExecutionTime());
     }
 
     @Scheduled(fixedDelayString = "30000")
