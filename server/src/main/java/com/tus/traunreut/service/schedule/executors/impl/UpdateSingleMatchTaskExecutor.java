@@ -2,7 +2,9 @@ package com.tus.traunreut.service.schedule.executors.impl;
 
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateSingleMatchTask;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UpdateSingleMatchTaskExecutor implements ScheduledTaskExecutor<UpdateSingleMatchTask> {
     @Override
     public void execute(UpdateSingleMatchTask task) {
