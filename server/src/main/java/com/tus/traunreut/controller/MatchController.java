@@ -53,14 +53,14 @@ public class MatchController {
         List<CompletableFuture<Void>> futures = pastMatches.getContent().stream().map(matchDto -> {
             CompletableFuture<String> homeLogoFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return imageService.fetchLogoBase64(matchDto.getMatch().getHomeTeam().getClub().getLogoUrl());
+                    return matchDto.getMatch().getHomeTeam().getClub().getLogoBase64();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             });
             CompletableFuture<String> guestLogoFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return imageService.fetchLogoBase64(matchDto.getMatch().getGuestTeam().getClub().getLogoUrl());
+                    return matchDto.getMatch().getGuestTeam().getClub().getLogoBase64();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -98,13 +98,13 @@ public class MatchController {
                     String guestTeamLogo = null;
 
                     try {
-                        homeTeamLogo = imageService.fetchLogoBase64(match.getHomeTeam().getClub().getLogoUrl());
+                        homeTeamLogo = match.getHomeTeam().getClub().getLogoBase64();
                     } catch (Exception e) {
                         System.err.println("Failed to fetch home team logo for match: " + match.getId());
                     }
 
                     try {
-                        guestTeamLogo = imageService.fetchLogoBase64(match.getGuestTeam().getClub().getLogoUrl());
+                        guestTeamLogo = match.getGuestTeam().getClub().getLogoBase64();
                     } catch (Exception e) {
                         System.err.println("Failed to fetch guest team logo for match: " + match.getId());
                     }
@@ -134,12 +134,12 @@ public class MatchController {
         String homeTeamLogo;
         String guestTeamLogo;
         try {
-            homeTeamLogo = imageService.fetchLogoBase64(match.getHomeTeam().getClub().getLogoUrl());
+            homeTeamLogo = match.getHomeTeam().getClub().getLogoBase64();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
         try {
-            guestTeamLogo = imageService.fetchLogoBase64(match.getGuestTeam().getClub().getLogoUrl());
+            guestTeamLogo = match.getGuestTeam().getClub().getLogoBase64();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -156,12 +156,12 @@ public class MatchController {
         String homeTeamLogo;
         String guestTeamLogo;
         try {
-            homeTeamLogo = imageService.fetchLogoBase64(match.getHomeTeam().getClub().getLogoUrl());
+            homeTeamLogo = match.getHomeTeam().getClub().getLogoBase64();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
         try {
-            guestTeamLogo = imageService.fetchLogoBase64(match.getGuestTeam().getClub().getLogoUrl());
+            guestTeamLogo = match.getGuestTeam().getClub().getLogoBase64();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
