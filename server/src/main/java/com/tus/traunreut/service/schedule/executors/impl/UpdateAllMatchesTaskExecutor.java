@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.tus.traunreut.Markers.DB_LOG;
+import static com.tus.traunreut.Log.DB_LOG;
 
 
 @Service
@@ -92,38 +92,38 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
 
                 // Update only changed fields
                 if (!Objects.equals(dbMatch.getMatchDate(), scraped.getMatchDate())) {
-                    DB_LOG.info(Markers.DATABASE, "Match date for match {} changed from {} to {}", dbMatch.getId(), DateTimeUtil.formatDate(dbMatch.getMatchDate()), DateTimeUtil.formatDate(scraped.getMatchDate()));
+                    DB_LOG.info(Log.DATABASE, "Match date for match {} changed from {} to {}", dbMatch.getId(), DateTimeUtil.formatDate(dbMatch.getMatchDate()), DateTimeUtil.formatDate(scraped.getMatchDate()));
                     dbMatch.setMatchDate(scraped.getMatchDate());
                     updated = true;
                 }
                 if (!Objects.equals(dbMatch.getHomeGoals(), scraped.getHomeGoals())) {
-                    DB_LOG.info(Markers.DATABASE, "Home goals for match {} changed from {} to {}", dbMatch.getId(),
+                    DB_LOG.info(Log.DATABASE, "Home goals for match {} changed from {} to {}", dbMatch.getId(),
                             Objects.requireNonNullElse(dbMatch.getHomeGoals(), 0), Objects.requireNonNullElse(dbMatch.getGuestGoals(), 0));
                     dbMatch.setHomeGoals(scraped.getHomeGoals());
                     updated = true;
                 }
                 if (!Objects.equals(dbMatch.getGuestGoals(), scraped.getGuestGoals())) {
-                    DB_LOG.info(Markers.DATABASE, "Guest goals for match {} changed from {} to {}", dbMatch.getId(),
+                    DB_LOG.info(Log.DATABASE, "Guest goals for match {} changed from {} to {}", dbMatch.getId(),
                             Objects.requireNonNullElse(scraped.getHomeGoals(), 0), Objects.requireNonNullElse(scraped.getGuestGoals(), 0));
                     dbMatch.setGuestGoals(scraped.getGuestGoals());
                     updated = true;
                 }
                 if (dbMatch.isHasReport() != scraped.isHasReport()) {
-                    DB_LOG.info(Markers.DATABASE, "HasReport changed for match {} from {} to {}", dbMatch.getId(), dbMatch.isHasReport(), scraped.isHasReport());
+                    DB_LOG.info(Log.DATABASE, "HasReport changed for match {} from {} to {}", dbMatch.getId(), dbMatch.isHasReport(), scraped.isHasReport());
                     dbMatch.setHasReport(scraped.isHasReport());
                     updated = true;
                 }
 
                 if (updated) {
                     matchRepository.save(dbMatch);
-                    DB_LOG.info(Markers.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
+                    DB_LOG.info(Log.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
                 }
 
                 scrapedMap.remove(key);
             } else {
                 // Match no longer in scraper → delete
                 matchRepository.delete(dbMatch);
-                DB_LOG.info(Markers.DATABASE, "Deleted match from DB: home={} guest={}",
+                DB_LOG.info(Log.DATABASE, "Deleted match from DB: home={} guest={}",
                         dbMatch.getHomeTeam().getName(),
                         dbMatch.getGuestTeam().getName());
             }

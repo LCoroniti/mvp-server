@@ -5,13 +5,15 @@ import com.tus.traunreut.events.PrepareScheduledTasksEvent;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("prod")
 @Component
-public class ScheduledTasksInitializer implements ApplicationListener<ApplicationReadyEvent> {
+public class ScheduledTasksBootstrapper implements ApplicationListener<ApplicationReadyEvent> {
     private final ApplicationEventPublisher publisher;
 
-    public ScheduledTasksInitializer(ApplicationEventPublisher publisher) {
+    public ScheduledTasksBootstrapper(ApplicationEventPublisher publisher) {
         this.publisher = publisher;
     }
 

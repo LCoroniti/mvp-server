@@ -7,8 +7,6 @@ import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.executors.TaskExecutorRegistry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,11 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Collectors;
 
+import static com.tus.traunreut.Log.*;
+
 @Service
 @RequiredArgsConstructor
 public class TaskSchedulingService {
-    private static final Logger LOGGER = LoggerFactory.getLogger("CONSOLE");
-
     private final ScheduledTaskRepository repository;
     private final TaskScheduler taskScheduler;
     private final TaskExecutorRegistry taskExecutorRegistry;
@@ -37,7 +35,7 @@ public class TaskSchedulingService {
     @EventListener
     public void handleInitializeScheduledTasks(InitializeScheduledTasksEvent event) {
         List<ScheduledTask> tasks = repository.findByExecutionTimeAfter(LocalDateTime.now());
-        LOGGER.info("Scheduling {} tasks on startup", tasks.size());
+        DB_LOG.info(DATABASE, "Scheduling {} tasks on startup", tasks.size());
 
         for (ScheduledTask task : tasks) {
             scheduleTask(task);
@@ -58,7 +56,7 @@ public class TaskSchedulingService {
         );
         scheduledTasks.put(task.getId(), new ScheduledTaskInfo(future, executionInstant));
 
-        LOGGER.info("{} (Task ID: {}) scheduled to run at {}", task.getClass().getSimpleName(), task.getId(), task.getExecutionTime());
+        DB_LOG.info(DATABASE, "{} (Task ID: {}) scheduled to run at {}", task.getClass().getSimpleName(), task.getId(), task.getExecutionTime());
     }
 
     @Scheduled(fixedDelayString = "30000")
@@ -74,7 +72,7 @@ public class TaskSchedulingService {
                 ScheduledTaskInfo info = scheduledTasks.remove(scheduledTaskId);
                 if (info != null) {
                     info.future().cancel(false);
-                    LOGGER.info("Cancelled scheduled task {} because it was removed from DB", scheduledTaskId);
+                    DB_LOG.info(DATABASE, "Cancelled scheduled task {} because it was removed from DB", scheduledTaskId);
                 }
             }
         }
@@ -90,7 +88,7 @@ public class TaskSchedulingService {
             if (scheduledInfo == null) {
                 // Not scheduled yet
                 if (newExecutionInstant.isBefore(now)) {
-                    LOGGER.warn("Task {} execution time in past, executing immediately", task.getId());
+                    DB_LOG.info(DATABASE, "Task {} execution time in past, executing immediately", task.getId());
                     executeAndRemove(task);
                 } else {
                     scheduleTask(task);
@@ -102,7 +100,7 @@ public class TaskSchedulingService {
                 if (!newExecutionInstant.equals(scheduledExecutionInstant)) {
                     // Execution time changed -> cancel old and reschedule
                     scheduledInfo.future().cancel(false);
-                    LOGGER.info("Rescheduling task {} due to execution time update", task.getId());
+                    DB_LOG.info(DATABASE, "Rescheduling task {} due to execution time update", task.getId());
                     scheduleTask(task);
                 }
                 // else do nothing, already scheduled with correct time
@@ -118,15 +116,15 @@ public class TaskSchedulingService {
         try {
             ScheduledTaskExecutor<ScheduledTask> executor = taskExecutorRegistry.getExecutor(task);
             if (executor != null) {
-                LOGGER.info("Executing task {}", task.getId());
+                INTERNAL_LOG.info(INTERNAL, "Executing task {}", task.getId());
                 executor.execute(task);
             } else {
-                LOGGER.warn("No executor found for task {}", task.getId());
+                INTERNAL_LOG.info(INTERNAL, "No executor found for task {}", task.getId());
             }
             repository.deleteById(task.getId());
             scheduledTasks.remove(task.getId());
         } catch (Exception e) {
-            LOGGER.error("Failed to execute task {}", task.getId(), e);
+            INTERNAL_LOG.info(INTERNAL, "Failed to execute task {}", task.getId(), e);
         }
     }
 
@@ -151,14 +149,14 @@ public class TaskSchedulingService {
         if (info != null) {
             boolean cancelled = info.future().cancel(false);
             if (cancelled) {
-                LOGGER.info("Cancelled scheduled task {}", taskId);
                 repository.deleteById(taskId);
+                DB_LOG.info(DATABASE, "Cancelled scheduled task {} and removed from database", taskId);
             } else {
-                LOGGER.warn("Failed to cancel scheduled task {}", taskId);
+                DB_LOG.error(DATABASE, "Failed to cancel scheduled task {}. Still present in database!", taskId);
             }
             return cancelled;
         } else {
-            LOGGER.warn("No scheduled task found with id {}", taskId);
+            DB_LOG.info(DATABASE, "No scheduled task found with id {}", taskId);
             return false;
         }
     }
