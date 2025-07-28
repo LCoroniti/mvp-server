@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-public class Markers {
+public class Log {
     public final static Marker NETWORK = MarkerFactory.getMarker("NETWORK");
     public final static Marker DATABASE = MarkerFactory.getMarker("DATABASE");
     public final static Marker INTERNAL = MarkerFactory.getMarker("INTERNAL");

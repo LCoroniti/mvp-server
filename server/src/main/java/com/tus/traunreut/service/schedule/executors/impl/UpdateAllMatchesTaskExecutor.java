@@ -3,18 +3,16 @@ package com.tus.traunreut.service.schedule.executors.impl;
 import com.tus.traunreut.*;
 import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.repository.MatchRepository;
-import com.tus.traunreut.scraper.MatchIDScraper;
+import com.tus.traunreut.scraper.DataFetchException;
 import com.tus.traunreut.service.MatchParsingService;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateAllMatchesTask;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.javers.core.Javers;
-import org.javers.core.diff.Diff;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +21,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.tus.traunreut.Markers.DB_LOG;
+import static com.tus.traunreut.Log.DB_LOG;
 
+
+@Service
 @RequiredArgsConstructor
 public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<UpdateAllMatchesTask> {
     private static final Logger databaseLogger = LoggerFactory.getLogger("DATABASE");
@@ -32,7 +32,6 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
     private final LeagueRepository leagueRepository;
     private final MatchParsingService matchParsingService;
     private final ScraperFactory scraperFactory;
-    private final Javers javers;
 
     @Override
     @Transactional
@@ -50,8 +49,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
             for (String leagueName : leagues) {
                 // Step 1: Fetch raw table rows using MatchScraper
                 Optional<League> optLeague = leagueRepository.findByName(leagueName);
-                if (optLeague.isEmpty())
-                {
+                if (optLeague.isEmpty()) {
                     continue;
                 }
                 League league = optLeague.get();
@@ -61,21 +59,19 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 // Step 2: Parse the rows into Match entities
                 List<Match> matches = matchParsingService.parseTableData(rows, league);
                 if (matches != null && !matches.isEmpty()) {
-                    syncMatchesFromScraper(matches);
-                }
-                else {
+                    syncMatchesFromScraper(matches, league.getId());
+                } else {
                     databaseLogger.warn("No matches found for league: {}", leagueName);
                 }
 
             }
             databaseLogger.info("UpdateAllMatchesTask executed successfully.");
-        } catch (Exception e) {
+        } catch (DataFetchException e) {
             databaseLogger.error("Error occurred while executing UpdateAllMatchesTask: ", e);
         }
     }
 
-    private void syncMatchesFromScraper(List<Match> scrapedMatches)
-    {
+    void syncMatchesFromScraper(List<Match> scrapedMatches, Long leagueId) {
         // Step 1: Build map from scraped matches: key = homeTeamId + guestTeamId
         Map<String, Match> scrapedMap = scrapedMatches.stream()
                 .collect(Collectors.toMap(
@@ -84,7 +80,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 ));
 
         // Step 2: Fetch all matches currently in DB
-        List<Match> dbMatches = matchRepository.findAll();
+        List<Match> dbMatches = matchRepository.findByLeagueId(leagueId);
 
         for (Match dbMatch : dbMatches) {
             String key = buildKey(dbMatch);
@@ -92,46 +88,42 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
             if (scrapedMap.containsKey(key)) {
                 Match scraped = scrapedMap.get(key);
 
-                // Compare with JaVers
-                Diff diff = javers.compare(dbMatch, scraped);
+                boolean updated = false;
 
-                if (diff.hasChanges()) {
-                    DB_LOG.info(Markers.DATABASE, "Detected changes for match (home={} guest={}):\n{}",
-                            dbMatch.getHomeTeam().getName(),
-                            dbMatch.getGuestTeam().getName(),
-                            diff.prettyPrint());
-
-                    boolean updated = false;
-
-                    // Update only changed fields
-                    if (!Objects.equals(dbMatch.getMatchDate(), scraped.getMatchDate())) {
-                        dbMatch.setMatchDate(scraped.getMatchDate());
-                        updated = true;
-                    }
-                    if (!Objects.equals(dbMatch.getHomeGoals(), scraped.getHomeGoals())) {
-                        dbMatch.setHomeGoals(scraped.getHomeGoals());
-                        updated = true;
-                    }
-                    if (!Objects.equals(dbMatch.getGuestGoals(), scraped.getGuestGoals())) {
-                        dbMatch.setGuestGoals(scraped.getGuestGoals());
-                        updated = true;
-                    }
-                    if (dbMatch.isHasReport() != scraped.isHasReport()) {
-                        dbMatch.setHasReport(scraped.isHasReport());
-                        updated = true;
-                    }
-
-                    if (updated) {
-                        matchRepository.save(dbMatch);
-                        DB_LOG.info(Markers.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
-                    }
+                // Update only changed fields
+                if (!Objects.equals(dbMatch.getMatchDate(), scraped.getMatchDate())) {
+                    DB_LOG.info(Log.DATABASE, "Match date for match {} changed from {} to {}", dbMatch.getId(), DateTimeUtil.formatDate(dbMatch.getMatchDate()), DateTimeUtil.formatDate(scraped.getMatchDate()));
+                    dbMatch.setMatchDate(scraped.getMatchDate());
+                    updated = true;
+                }
+                if (!Objects.equals(dbMatch.getHomeGoals(), scraped.getHomeGoals())) {
+                    DB_LOG.info(Log.DATABASE, "Home goals for match {} changed from {} to {}", dbMatch.getId(),
+                            Objects.requireNonNullElse(dbMatch.getHomeGoals(), 0), Objects.requireNonNullElse(dbMatch.getGuestGoals(), 0));
+                    dbMatch.setHomeGoals(scraped.getHomeGoals());
+                    updated = true;
+                }
+                if (!Objects.equals(dbMatch.getGuestGoals(), scraped.getGuestGoals())) {
+                    DB_LOG.info(Log.DATABASE, "Guest goals for match {} changed from {} to {}", dbMatch.getId(),
+                            Objects.requireNonNullElse(scraped.getHomeGoals(), 0), Objects.requireNonNullElse(scraped.getGuestGoals(), 0));
+                    dbMatch.setGuestGoals(scraped.getGuestGoals());
+                    updated = true;
+                }
+                if (dbMatch.isHasReport() != scraped.isHasReport()) {
+                    DB_LOG.info(Log.DATABASE, "HasReport changed for match {} from {} to {}", dbMatch.getId(), dbMatch.isHasReport(), scraped.isHasReport());
+                    dbMatch.setHasReport(scraped.isHasReport());
+                    updated = true;
                 }
 
-                scrapedMap.remove(key); // remove handled match
+                if (updated) {
+                    matchRepository.save(dbMatch);
+                    DB_LOG.info(Log.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
+                }
+
+                scrapedMap.remove(key);
             } else {
                 // Match no longer in scraper → delete
                 matchRepository.delete(dbMatch);
-                DB_LOG.info(Markers.DATABASE, "Deleted match from DB: home={} guest={}",
+                DB_LOG.info(Log.DATABASE, "Deleted match from DB: home={} guest={}",
                         dbMatch.getHomeTeam().getName(),
                         dbMatch.getGuestTeam().getName());
             }

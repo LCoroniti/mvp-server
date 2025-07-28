@@ -17,8 +17,9 @@ dependencies {
     implementation project(':scraper')
     implementation project(':log')
 
-    testImplementation 'com.h2database:h2'
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
 
-    compileOnly  'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 }

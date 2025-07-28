@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "task_id", discriminatorType = DiscriminatorType.INTEGER)
 public abstract class ScheduledTask {

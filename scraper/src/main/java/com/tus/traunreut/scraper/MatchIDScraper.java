@@ -1,29 +1,18 @@
 package com.tus.traunreut.scraper;
 
-import com.tus.traunreut.*;
+import com.tus.traunreut.AbstractScraper;
+import com.tus.traunreut.DateTimeUtil;
+import com.tus.traunreut.League;
+import com.tus.traunreut.Match;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static com.tus.traunreut.Log.NETWORK;
+import static com.tus.traunreut.Log.NETWORK_LOG;
 
 public class MatchIDScraper extends AbstractScraper<String> {
-    private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
     private final League league;
     private final Match match;
 
@@ -31,19 +20,26 @@ public class MatchIDScraper extends AbstractScraper<String> {
         this.league = league;
         this.match = match;
     }
+
     /**
-     * Scrape the match id for the given match from nuLiga.
+     * Scrape the match id for the given match from nuLiga. Return null if something went wrong.
      */
     @Override
     public String fetchData() {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/meetings/" + league.getGroupdId() + "/time/" + now;
-        networkLogger.info(Markers.NETWORK, "Scraping meetingId from Ticker: {} : {} (League = {})",
+        NETWORK_LOG.info(NETWORK, "Scraping meetingId from Ticker: {} : {} (League = {})",
                 match.getHomeTeam().getName(),
                 match.getGuestTeam().getName(),
                 match.getHomeTeam().getLeague());
 
-        String meetingsJson = getRequest(url);
+        String meetingsJson;
+        try {
+            meetingsJson = getRequest(url);
+        } catch (IOException e) {
+            NETWORK_LOG.error(NETWORK, "Failed to fetch meetingId from Ticker for match with ID: {}", match.getId(), e);
+            return null;
+        }
 
         JSONObject jsonObject = new JSONObject(meetingsJson);
         JSONArray meetings = jsonObject.getJSONArray("meetings");
@@ -56,7 +52,7 @@ public class MatchIDScraper extends AbstractScraper<String> {
                 return meeting.getString("meetingID");
             }
         }
-        networkLogger.warn(Markers.NETWORK, "No meetingId found for match: {} : {} (League = {})",
+        NETWORK_LOG.warn(NETWORK, "No meetingId found for match: {} : {} (League = {})",
                 match.getHomeTeam().getName(),
                 match.getGuestTeam().getName(),
                 match.getHomeTeam().getLeague());

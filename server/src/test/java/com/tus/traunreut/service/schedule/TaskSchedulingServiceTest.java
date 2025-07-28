@@ -1,8 +1,8 @@
 package com.tus.traunreut.service.schedule;
 
+import com.tus.traunreut.AbstractIntegrationTest;
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.events.InitializeScheduledTasksEvent;
-import com.tus.traunreut.AbstractIntegrationTest;
 import com.tus.traunreut.repository.ScheduledTaskRepository;
 import com.tus.traunreut.service.schedule.tasks.UpdateMatchPlayersTask;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,6 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.*;
 

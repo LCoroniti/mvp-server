@@ -1,23 +1,17 @@
 package com.tus.traunreut.service;
 
 import com.tus.traunreut.Team;
-import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.repository.TeamRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TeamService {
-
     private final TeamRepository teamRepository;
-    private final LeagueRepository leagueRepository;
-
-    public TeamService(TeamRepository teamRepository, LeagueRepository leagueRepository) {
-        this.teamRepository = teamRepository;
-        this.leagueRepository = leagueRepository;
-    }
 
     public List<Team> getAllTeams() {
         return teamRepository.findAll();

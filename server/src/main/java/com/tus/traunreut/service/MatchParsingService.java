@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.tus.traunreut.Markers.INTERNAL;
-import static com.tus.traunreut.Markers.INTERNAL_LOG;
+import static com.tus.traunreut.Log.INTERNAL;
+import static com.tus.traunreut.Log.INTERNAL_LOG;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class MatchParsingService {
     private static final int HOME_TEAM_INDEX = 5;
     private static final int GUEST_TEAM_INDEX = 6;
     private static final int GOALS_INDEX = 7;
-    private TeamService teamService;
+    private final TeamService teamService;
 
     public List<Match> parseTableData(List<Element> rows, League league) {
         List<Match> matches = new ArrayList<>();
@@ -43,6 +43,7 @@ public class MatchParsingService {
             try {
                 match.setMatchDate(parseLocalDateTime(date, time));
             } catch (DateTimeParseException e) {
+                INTERNAL_LOG.warn(INTERNAL, "Unparseable HTML value for date field: '{}'. Match ({} vs {} from league {}) will be ignored! ", date, homeTeam, guestTeam, league.getName());
                 continue;
             }
             Team home = teamService.getTeamByNameAndLeague(homeTeam, league.getName()).orElse(null);
@@ -63,9 +64,9 @@ public class MatchParsingService {
                     match.setHomeGoals(homeGoals);
                     match.setGuestGoals(guestGoals);
                     match.setHasReport(true);
-                } catch (NumberFormatException e)
-                {
-                    INTERNAL_LOG.error(INTERNAL, "Error while trying to parse the goals from HMTL value: {}", goals, e);
+                } catch (NumberFormatException e) {
+                    INTERNAL_LOG.warn(INTERNAL, "Unparseable HTML value for goal field: '{}'. Match ({} vs {} from league {}) will be ignored! ", goals, home.getName(), guest.getName(), league.getName());
+                    continue;
                 }
             }
             matches.add(match);
