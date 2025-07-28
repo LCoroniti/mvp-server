@@ -4,27 +4,32 @@ package com.tus.traunreut.scraper;
 import com.tus.traunreut.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.tus.traunreut.Log.NETWORK;
+import static com.tus.traunreut.Log.NETWORK_LOG;
 
 public class MatchPlayerScraper extends AbstractScraper<List<MatchPlayer>> {
     private final Match match;
 
-    public MatchPlayerScraper(Match match)
-    {
+    public MatchPlayerScraper(Match match) {
         this.match = match;
     }
-
-    private static final Logger networkLogger = LoggerFactory.getLogger("NETWORK");
 
     @Override
     public List<MatchPlayer> fetchData() {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/players/" + match.getNuligaMatchId() + "/time/" + now;
-        String playersJson = getRequest(url);
+        String playersJson;
+        try {
+            playersJson = getRequest(url);
+        } catch (IOException e) {
+            NETWORK_LOG.error(NETWORK, "Failed to fetch match player data for match with ID: {}", match.getId(), e);
+            return null;
+        }
         //TODO: move to MatchPlayerParsingService?
         JSONObject jsonObject = new JSONObject(playersJson);
         JSONArray matchPlayers = jsonObject.getJSONArray("meetingPersons");

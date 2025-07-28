@@ -11,7 +11,8 @@ import static com.tus.traunreut.Log.NETWORK;
 import static com.tus.traunreut.Log.NETWORK_LOG;
 
 public abstract class AbstractScraper<T> implements IScraper<T> {
-    protected String getRequest(String url) {
+
+    protected String getRequest(String url) throws IOException {
         NETWORK_LOG.info(NETWORK, "GET request to {}", url);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
@@ -25,8 +26,6 @@ public abstract class AbstractScraper<T> implements IScraper<T> {
                     throw new IOException("Unexpected response status: " + statusCode);
                 }
             });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

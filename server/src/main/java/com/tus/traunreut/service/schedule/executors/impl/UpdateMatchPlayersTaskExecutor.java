@@ -35,7 +35,7 @@ public class UpdateMatchPlayersTaskExecutor implements ScheduledTaskExecutor<Upd
                 matchPlayerRepository.saveAll(players);
                 DB_LOG.info(Log.DATABASE, "UpdateMatchPlayersTask executed successfully.");
             } else {
-                DB_LOG.warn(Log.DATABASE, "No player data available for the match. Retrying in 5 minutes...");
+                DB_LOG.warn(Log.DATABASE, "No player data available for the match.");
             }
         } catch (Exception e) {
             DB_LOG.error(Log.DATABASE, "Error while executing UpdateMatchPlayersTask: ", e);

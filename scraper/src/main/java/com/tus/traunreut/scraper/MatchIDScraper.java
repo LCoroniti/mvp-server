@@ -7,6 +7,8 @@ import com.tus.traunreut.Match;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 import static com.tus.traunreut.Log.NETWORK;
 import static com.tus.traunreut.Log.NETWORK_LOG;
 
@@ -20,7 +22,7 @@ public class MatchIDScraper extends AbstractScraper<String> {
     }
 
     /**
-     * Scrape the match id for the given match from nuLiga.
+     * Scrape the match id for the given match from nuLiga. Return null if something went wrong.
      */
     @Override
     public String fetchData() {
@@ -31,7 +33,13 @@ public class MatchIDScraper extends AbstractScraper<String> {
                 match.getGuestTeam().getName(),
                 match.getHomeTeam().getLeague());
 
-        String meetingsJson = getRequest(url);
+        String meetingsJson;
+        try {
+            meetingsJson = getRequest(url);
+        } catch (IOException e) {
+            NETWORK_LOG.error(NETWORK, "Failed to fetch meetingId from Ticker for match with ID: {}", match.getId(), e);
+            return null;
+        }
 
         JSONObject jsonObject = new JSONObject(meetingsJson);
         JSONArray meetings = jsonObject.getJSONArray("meetings");
