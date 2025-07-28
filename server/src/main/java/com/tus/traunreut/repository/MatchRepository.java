@@ -41,5 +41,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
            AND m.guestTeam.league.id = :leagueId
     """)
     List<Match> findByLeagueId(@Param("leagueId") Long leagueId);
+
+
 }
 

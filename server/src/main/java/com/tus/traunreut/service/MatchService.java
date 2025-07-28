@@ -4,28 +4,20 @@ import com.tus.traunreut.*;
 import com.tus.traunreut.dto.PlayerDto;
 import com.tus.traunreut.dto.history.HistoryMatchDto;
 import com.tus.traunreut.dto.history.VoteDto;
-import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.repository.MatchPlayerRepository;
 import com.tus.traunreut.repository.MatchRepository;
 import com.tus.traunreut.repository.VoteRepository;
-import com.tus.traunreut.service.schedule.EMatchTasks;
-import com.tus.traunreut.service.schedule.MatchTask;
-import com.tus.traunreut.service.schedule.TaskScheduler;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.javers.core.Javers;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.ValueChange;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,49 +25,18 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
-public class MatchService {
-    private static final Logger dbLogger = LoggerFactory.getLogger("DATABASE");
-    private static final Logger LOGGER = LoggerFactory.getLogger("CONSOLE");
+import static com.tus.traunreut.Log.DATABASE;
+import static com.tus.traunreut.Log.DB_LOG;
 
+@Service
+@RequiredArgsConstructor
+public class MatchService {
     private final MatchRepository matchRepository;
     private final VoteRepository voteRepository;
     private final MatchPlayerRepository matchPlayerRepository;
-    private final LeagueRepository leagueRepository;
-    private final ScraperService scraperService;
 
     @Autowired
     private Javers javers;
-
-    public MatchService(MatchRepository matchRepository, VoteRepository voteRepository, MatchPlayerRepository matchPlayerRepository, LeagueRepository leagueRepository) {
-        this.matchRepository = matchRepository;
-        this.voteRepository = voteRepository;
-        this.matchPlayerRepository = matchPlayerRepository;
-        this.scraperService = new ScraperService();
-        this.leagueRepository = leagueRepository;
-    }
-
-    /**
-     * Fetches all matches from nuliga and updates the existing matches.
-     * Removes canceled matches from the database.
-     */
-    public void updateAllMatches() {
-        try {
-            List<Match> scrapedMatches = scraperService.scrapeMatches(leagueRepository.findAll());
-            removeCanceledMatchers(scrapedMatches);
-            for (Match match : scrapedMatches) {
-                Optional<Match> persistentMatch = getMatch(match.getHomeTeam(), match.getGuestTeam());
-                if (persistentMatch.isEmpty()) {
-                    matchRepository.save(match);
-                } else if (match.isHasReport() && !persistentMatch.get().isHasReport()) {
-                    match.setId(persistentMatch.get().getId());
-                    matchRepository.save(match);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Remove matches that are in the db but are not present in the scraped matches.
@@ -88,14 +49,14 @@ public class MatchService {
                     return false;
                 }
             }
-            dbLogger.info(Markers.DATABASE, "Match will be removed: {} : {} (League = {})", match.getHomeTeam().getName(), match.getGuestTeam().getName(), match.getHomeTeam().getLeague().getName());
+            DB_LOG.info(DATABASE, "Match will be removed: {} : {} (League = {})", match.getHomeTeam().getName(), match.getGuestTeam().getName(), match.getHomeTeam().getLeague().getName());
             return true;
         }).toList();
         List<Match> postponedGames = persistentMatches.stream().filter(match -> {
             for (Match scrape : scraped) {
                 if (scrape.getHomeTeam().equals(match.getHomeTeam()) && scrape.getGuestTeam().equals(match.getGuestTeam())
                         && !scrape.getMatchDate().equals(match.getMatchDate())) {
-                    dbLogger.info(Markers.DATABASE, "Match was postponed: {} : {} (League = {}) from {} to {}",
+                    DB_LOG.info(DATABASE, "Match was postponed: {} : {} (League = {}) from {} to {}",
                             match.getHomeTeam().getName(),
                             match.getGuestTeam().getName(),
                             match.getHomeTeam().getLeague().getName(),
@@ -221,7 +182,7 @@ public class MatchService {
         Diff diff = javers.compare(existingMatch, updatedMatchDetails);
 
         if (diff.hasChanges()) {
-            dbLogger.info(Markers.DATABASE, "Updating Match ID {}. Changes: {}", id, diff.getChangesByType(ValueChange.class));
+            DB_LOG.info(DATABASE, "Updating Match ID {}. Changes: {}", id, diff.getChangesByType(ValueChange.class));
 
             existingMatch.setMatchDate(updatedMatchDetails.getMatchDate());
             existingMatch.setHomeTeam(updatedMatchDetails.getHomeTeam());

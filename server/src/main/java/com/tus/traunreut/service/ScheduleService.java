@@ -1,27 +1,21 @@
 package com.tus.traunreut.service;
 
-import com.tus.traunreut.DateTimeUtil;
-import com.tus.traunreut.Match;
-import com.tus.traunreut.MatchPlayer;
 import com.tus.traunreut.ScheduledTask;
-import com.tus.traunreut.service.schedule.EMatchTasks;
-import com.tus.traunreut.service.schedule.MatchTask;
-import com.tus.traunreut.service.schedule.TaskScheduler;
+import com.tus.traunreut.service.schedule.TaskSchedulingService;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ScheduleService {
 
 
-    public List<ScheduledTask> getAllTasks(){
-        // get all tasks from repo
-        // read task id and cast to correct object. Switch over ETaskIds
-    }
-
-    public void scheduleTask(ScheduledTask taskToSchedule){
-        TaskScheduler.getInstance().scheduleTask(...);
-    }
+//    public List<ScheduledTask> getAllTasks(){
+//        // get all tasks from repo
+//        // read task id and cast to correct object. Switch over ETaskIds
+//    }
+//
+//    public void scheduleTask(ScheduledTask taskToSchedule){
+//        TaskSchedulingService.getInstance().scheduleTask(...);
+//    }
 
     //    @EventListener(ApplicationReadyEvent.class)
 //    public void onStartup() {

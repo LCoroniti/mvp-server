@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Objects;
 
 @Entity
@@ -15,17 +17,22 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Club {
-
     @Id
     @Column(name = "club_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true)
     private String name;
 
     @Column(name = "logo")
-    private String logoUrl;
+    private byte[] logo;
+
+    @Transient
+    public String getLogoBase64() {
+        if (logo == null) return null;
+        return Base64.getEncoder().encodeToString(logo);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -36,6 +43,6 @@ public class Club {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, logoUrl);
+        return Objects.hash(name);
     }
 }

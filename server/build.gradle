@@ -9,9 +9,17 @@ dependencies {
     implementation 'org.apache.httpcomponents.core5:httpcore5:5.3.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.19.0'
     implementation 'org.javers:javers-core:7.8.0'
+    implementation 'org.jsoup:jsoup:1.18.1'
+    implementation 'org.json:json:20240303'
 
     implementation project(':model')
     implementation project(':util')
     implementation project(':scraper')
     implementation project(':log')
+
+    testImplementation 'org.testcontainers:postgresql:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
