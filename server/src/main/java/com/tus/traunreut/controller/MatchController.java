@@ -3,7 +3,8 @@ package com.tus.traunreut.controller;
 import com.tus.traunreut.Match;
 import com.tus.traunreut.dto.history.HistoryMatchDto;
 import com.tus.traunreut.dto.voting.VotingMatchDto;
-import com.tus.traunreut.service.external.ImageService;
+import com.tus.traunreut.service.MatchService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +14,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.tus.traunreut.service.MatchService;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,14 +23,9 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/match")
+@RequiredArgsConstructor
 public class MatchController {
     private final MatchService matchService;
-    private final ImageService imageService;
-
-    public MatchController(MatchService matchService, ImageService imageService) {
-        this.matchService = matchService;
-        this.imageService = imageService;
-    }
 
     @GetMapping
     public ResponseEntity<List<Match>> getAllMatches(@RequestParam(required = false) Long leagueId) {

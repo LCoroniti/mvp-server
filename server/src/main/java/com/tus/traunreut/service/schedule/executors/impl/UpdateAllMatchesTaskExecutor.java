@@ -3,18 +3,15 @@ package com.tus.traunreut.service.schedule.executors.impl;
 import com.tus.traunreut.*;
 import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.repository.MatchRepository;
-import com.tus.traunreut.scraper.MatchIDScraper;
+import com.tus.traunreut.scraper.DataFetchException;
 import com.tus.traunreut.service.MatchParsingService;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateAllMatchesTask;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.javers.core.Javers;
-import org.javers.core.diff.Diff;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static com.tus.traunreut.Markers.DB_LOG;
 
+
 @Service
 @RequiredArgsConstructor
 public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<UpdateAllMatchesTask> {
@@ -34,7 +32,6 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
     private final LeagueRepository leagueRepository;
     private final MatchParsingService matchParsingService;
     private final ScraperFactory scraperFactory;
-    private final Javers javers;
 
     @Override
     @Transactional
@@ -69,7 +66,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
 
             }
             databaseLogger.info("UpdateAllMatchesTask executed successfully.");
-        } catch (Exception e) {
+        } catch (DataFetchException e) {
             databaseLogger.error("Error occurred while executing UpdateAllMatchesTask: ", e);
         }
     }
