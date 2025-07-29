@@ -15,4 +15,9 @@ public class UpdateMatchPlayersTask extends ScheduledTask {
     public UpdateMatchPlayersTask(LocalDateTime executionTime) {
         super(executionTime);
     }
+
+    @Override
+    public String getTaskName() {
+        return "Update Match Players";
+    }
 }

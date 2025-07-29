@@ -28,4 +28,6 @@ public abstract class ScheduledTask {
 
     @Column(name = "match_id")
     private String matchId;
+
+    public abstract String getTaskName();
 }

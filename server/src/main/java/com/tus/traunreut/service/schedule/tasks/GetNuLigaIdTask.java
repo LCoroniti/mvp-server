@@ -6,18 +6,12 @@ import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("4")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UpdateAllMatchesTask extends ScheduledTask {
-    public UpdateAllMatchesTask(LocalDateTime executionTime) {
-        super(executionTime);
-    }
-
+public class GetNuLigaIdTask extends ScheduledTask {
     @Override
     public String getTaskName() {
-        return "Update all Matches";
+        return "Get NuLiga ID";
     }
 }
