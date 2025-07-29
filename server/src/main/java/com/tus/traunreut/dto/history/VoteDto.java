@@ -1,7 +1,11 @@
 package com.tus.traunreut.dto.history;
 
 import com.tus.traunreut.dto.PlayerDto;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class VoteDto {
     private PlayerDto player;
     private double votingPercentage;
@@ -13,21 +17,5 @@ public class VoteDto {
 
     public VoteDto(PlayerDto player) {
         this.player = player;
-    }
-
-    public PlayerDto getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(PlayerDto player) {
-        this.player = player;
-    }
-
-    public double getVotingPercentage() {
-        return votingPercentage;
-    }
-
-    public void setVotingPercentage(double votingPercentage) {
-        this.votingPercentage = votingPercentage;
     }
 }

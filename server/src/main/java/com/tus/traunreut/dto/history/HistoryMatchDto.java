@@ -3,9 +3,13 @@ package com.tus.traunreut.dto.history;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tus.traunreut.Match;
 import com.tus.traunreut.dto.MatchDto;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 public class HistoryMatchDto extends MatchDto {
     private List<VoteDto> votes;
     @JsonIgnore
@@ -23,37 +27,5 @@ public class HistoryMatchDto extends MatchDto {
 
     public HistoryMatchDto(Match match, List<VoteDto> votes) {
         this(match, null, null, votes);
-    }
-
-    public List<VoteDto> getVotes() {
-        return votes;
-    }
-
-    public void setVotes(List<VoteDto> votes) {
-        this.votes = votes;
-    }
-
-    public Match getMatch() {
-        return match;
-    }
-
-    public void setMatch(Match match) {
-        this.match = match;
-    }
-
-    public int getHomeGoals() {
-        return homeGoals;
-    }
-
-    public void setHomeGoals(int homeGoals) {
-        this.homeGoals = homeGoals;
-    }
-
-    public int getGuestGoals() {
-        return guestGoals;
-    }
-
-    public void setGuestGoals(int guestGoals) {
-        this.guestGoals = guestGoals;
     }
 }
