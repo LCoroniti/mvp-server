@@ -164,4 +164,8 @@ public class TaskSchedulingService {
     Map<Long, ScheduledTaskInfo> getScheduledTasks() {
         return Collections.unmodifiableMap(scheduledTasks);
     }
+
+    public List<ScheduledTask> getAllScheduledTasks() {
+        return repository.findAll();
+    }
 }

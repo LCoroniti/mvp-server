@@ -88,6 +88,10 @@ public class MatchService {
         return matchRepository.findById(id);
     }
 
+    public List<Match> getMatchesByIds(Collection<Long> ids) {
+        return matchRepository.findAllById(ids);
+    }
+
     @Transactional
     public List<Match> getAllMatchesCurrentWeek() {
         LocalDateTime today = DateTimeUtil.nowGerman().minusHours(1);
