@@ -1,5 +1,6 @@
 package com.tus.traunreut.service.schedule;
 
+import com.tus.traunreut.Match;
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.events.InitializeScheduledTasksEvent;
 import com.tus.traunreut.repository.ScheduledTaskRepository;
@@ -138,6 +139,20 @@ public class TaskSchedulingService {
     }
 
     /**
+     * Adds multiple {@link ScheduledTask}s to the repository and schedules them in memory.
+     *
+     * @param tasks The list of tasks to add.
+     * @return The list of saved tasks with their generated IDs.
+     */
+    public List<ScheduledTask> addTasks(List<ScheduledTask> tasks) {
+        List<ScheduledTask> savedTasks = repository.saveAll(tasks);
+        for (ScheduledTask task : savedTasks) {
+            scheduleTask(task);
+        }
+        return savedTasks;
+    }
+
+    /**
      * Cancels a scheduled task by its ID if it is currently scheduled in memory.
      *
      * @param taskId the ID of the scheduled task to cancel
@@ -167,5 +182,40 @@ public class TaskSchedulingService {
 
     public List<ScheduledTask> getAllScheduledTasks() {
         return repository.findAll();
+    }
+
+    /**
+     * Finds all scheduled tasks for a given match, cancels them from the in-memory scheduler,
+     * and removes them from the database.
+     *
+     * @param match The match for which all scheduled tasks should be cancelled.
+     */
+    @Transactional
+    public void cancelAllTasksForMatch(Match match) {
+        String matchId = String.valueOf(match.getId());
+        List<ScheduledTask> tasksForMatch = repository.findAllByMatchId(matchId);
+
+        if (tasksForMatch.isEmpty()) {
+            DB_LOG.info(DATABASE, "No scheduled tasks found to cancel for match id {}", matchId);
+            return;
+        }
+
+        DB_LOG.info(DATABASE, "Cancelling {} tasks for match id {}", tasksForMatch.size(), matchId);
+
+        List<Long> taskIds = new ArrayList<>();
+        for (ScheduledTask task : tasksForMatch) {
+            Long taskId = task.getId();
+            taskIds.add(taskId);
+
+            // Cancel any in-memory scheduled future for the task
+            ScheduledTaskInfo info = scheduledTasks.remove(taskId);
+            if (info != null) {
+                info.future().cancel(false);
+            }
+        }
+
+        // Delete all tasks from the database in a single, efficient batch operation
+        repository.deleteAllByIdInBatch(taskIds);
+        DB_LOG.info(DATABASE, "Removed {} tasks from database for match id {}", tasksForMatch.size(), matchId);
     }
 }

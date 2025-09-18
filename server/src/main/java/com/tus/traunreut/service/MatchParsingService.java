@@ -35,10 +35,13 @@ public class MatchParsingService {
         List<Match> matches = new ArrayList<>();
         for (Element row : rows) {
             Elements cells = row.select("td, th");
-            String date = clearWhitespaces(cells.get(DATE_INDEX).text());
-            String time = clearWhitespaces(cells.get(TIME_INDEX).text()).replaceAll("[^0-9:]", "");
             String homeTeam = cleanTeamName(cells.get(HOME_TEAM_INDEX).text());
             String guestTeam = cleanTeamName(cells.get(GUEST_TEAM_INDEX).text());
+            if (homeTeam.equals("spielfrei") || guestTeam.equals("spielfrei")) {
+                continue;
+            }
+            String date = clearWhitespaces(cells.get(DATE_INDEX).text());
+            String time = clearWhitespaces(cells.get(TIME_INDEX).text()).replaceAll("[^0-9:]", "");
             Match match = new Match();
             try {
                 match.setMatchDate(parseLocalDateTime(date, time));

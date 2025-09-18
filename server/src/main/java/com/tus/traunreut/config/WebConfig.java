@@ -16,12 +16,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(false);
     }
 
-//    @Override
-//    public void addViewControllers(ViewControllerRegistry registry) {
-//        registry.addViewController("/vote/{id}")
-//                .setViewName("forward:/index.html");
-//
-//        registry.addViewController("/")
-//                .setViewName("forward:/index.html");
-//    }
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/vote/{id}")
+                .setViewName("forward:/index.html");
+
+        registry.addViewController("/")
+                .setViewName("forward:/index.html");
+
+        registry.addViewController("/admin/*")
+                .setViewName("forward:/index.html");
+    }
 }

@@ -4,7 +4,7 @@ import com.tus.traunreut.AbstractIntegrationTest;
 import com.tus.traunreut.ScheduledTask;
 import com.tus.traunreut.events.InitializeScheduledTasksEvent;
 import com.tus.traunreut.repository.ScheduledTaskRepository;
-import com.tus.traunreut.service.schedule.tasks.UpdateMatchPlayersTask;
+import com.tus.traunreut.service.schedule.tasks.UpdateAllMatchesTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -38,7 +38,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testInitializeSchedulesFutureTasks() {
         // given: a task in the future
         LocalDateTime futureTime = LocalDateTime.now().plusSeconds(10);
-        ScheduledTask task = repository.save(new UpdateMatchPlayersTask(futureTime));
+        ScheduledTask task = repository.save(new UpdateAllMatchesTask(futureTime));
 
         // when: trigger initialization
         eventPublisher.publishEvent(new InitializeScheduledTasksEvent());
@@ -52,7 +52,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testAddTask_schedulesTaskImmediately() {
         // given
         LocalDateTime futureTime = LocalDateTime.now().plusMinutes(1);
-        ScheduledTask task = new UpdateMatchPlayersTask(futureTime);
+        ScheduledTask task = new UpdateAllMatchesTask(futureTime);
 
         // when
         ScheduledTask saved = schedulingService.addTask(task);
@@ -67,7 +67,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testCancelScheduledTask_removesFromMemory() {
         // given
         LocalDateTime time = LocalDateTime.now().plusMinutes(1);
-        ScheduledTask task = schedulingService.addTask(new UpdateMatchPlayersTask(time));
+        ScheduledTask task = schedulingService.addTask(new UpdateAllMatchesTask(time));
 
         // when
         boolean cancelled = schedulingService.cancelScheduledTask(task.getId());
@@ -83,7 +83,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testExecuteAndRemove_executesTaskAndDeletesFromDb() {
         // given: task saved & scheduled
         LocalDateTime time = LocalDateTime.now().plusSeconds(2);
-        ScheduledTask task = repository.save(new UpdateMatchPlayersTask(time));
+        ScheduledTask task = repository.save(new UpdateAllMatchesTask(time));
 
         // when: execute
         schedulingService.executeAndRemove(task);
@@ -96,7 +96,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testUpdatedScheduledTasksFromDatabase_addsNewTask() {
         // given: add new task directly to DB (simulate external insert)
         LocalDateTime time = LocalDateTime.now().plusSeconds(5);
-        ScheduledTask task = repository.save(new UpdateMatchPlayersTask(time));
+        ScheduledTask task = repository.save(new UpdateAllMatchesTask(time));
 
         // when: call update method
         schedulingService.updatedScheduledTasksFromDatabase();
@@ -110,7 +110,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testUpdatedScheduledTasksFromDatabase_cancelsRemovedTask() {
         // given: add and schedule task
         LocalDateTime time = LocalDateTime.now().plusMinutes(1);
-        ScheduledTask task = schedulingService.addTask(new UpdateMatchPlayersTask(time));
+        ScheduledTask task = schedulingService.addTask(new UpdateAllMatchesTask(time));
 
         // then: remove task from DB to simulate external delete
         repository.deleteById(task.getId());
@@ -127,7 +127,7 @@ public class TaskSchedulingServiceTest extends AbstractIntegrationTest {
     void testUpdatedScheduledTasksFromDatabase_reschedulesOnExecutionTimeChange() {
         // given: task scheduled with initial time
         LocalDateTime initialTime = LocalDateTime.now().plusSeconds(60);
-        ScheduledTask task = repository.save(new UpdateMatchPlayersTask(initialTime));
+        ScheduledTask task = repository.save(new UpdateAllMatchesTask(initialTime));
         eventPublisher.publishEvent(new InitializeScheduledTasksEvent());
 
         // Capture initial ScheduledTaskInfo
