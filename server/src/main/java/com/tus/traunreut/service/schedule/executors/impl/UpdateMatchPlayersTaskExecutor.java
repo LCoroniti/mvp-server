@@ -1,8 +1,12 @@
 package com.tus.traunreut.service.schedule.executors.impl;
 
-import com.tus.traunreut.*;
+import com.tus.traunreut.IScraper;
+import com.tus.traunreut.Log;
+import com.tus.traunreut.Match;
+import com.tus.traunreut.MatchPlayer;
 import com.tus.traunreut.repository.MatchPlayerRepository;
 import com.tus.traunreut.repository.MatchRepository;
+import com.tus.traunreut.scraper.ScraperFactory;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateMatchPlayersTask;
 import lombok.RequiredArgsConstructor;

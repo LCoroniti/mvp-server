@@ -4,6 +4,8 @@ import com.tus.traunreut.AbstractScraper;
 import com.tus.traunreut.DateTimeUtil;
 import com.tus.traunreut.League;
 import com.tus.traunreut.Match;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -12,20 +14,16 @@ import java.io.IOException;
 import static com.tus.traunreut.Log.NETWORK;
 import static com.tus.traunreut.Log.NETWORK_LOG;
 
+@RequiredArgsConstructor(access = AccessLevel.MODULE)
 public class MatchIDScraper extends AbstractScraper<String> {
     private final League league;
     private final Match match;
-
-    public MatchIDScraper(League league, Match match) {
-        this.league = league;
-        this.match = match;
-    }
 
     /**
      * Scrape the match id for the given match from nuLiga. Return null if something went wrong.
      */
     @Override
-    public String fetchData() {
+    public String fetchData() throws DataFetchException {
         long now = DateTimeUtil.nowGermanSecondsRounded();
         String url = "https://hbde-live.liga.nu/nuScoreLiveRestBackend/api/1/meetings/" + league.getGroupdId() + "/time/" + now;
         NETWORK_LOG.info(NETWORK, "Scraping meetingId from Ticker: {} : {} (League = {})",
@@ -38,7 +36,7 @@ public class MatchIDScraper extends AbstractScraper<String> {
             meetingsJson = getRequest(url);
         } catch (IOException e) {
             NETWORK_LOG.error(NETWORK, "Failed to fetch meetingId from Ticker for match with ID: {}", match.getId(), e);
-            return null;
+            throw new DataFetchException("Failed to fetch meetingId from Ticker for match with ID: %d".formatted(match.getId()), e);
         }
 
         JSONObject jsonObject = new JSONObject(meetingsJson);

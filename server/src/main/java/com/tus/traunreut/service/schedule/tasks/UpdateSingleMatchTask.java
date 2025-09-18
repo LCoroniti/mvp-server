@@ -15,4 +15,9 @@ public class UpdateSingleMatchTask extends ScheduledTask {
     public UpdateSingleMatchTask(LocalDateTime executionTime) {
         super(executionTime);
     }
+
+    @Override
+    public String getTaskName() {
+        return "Update Match";
+    }
 }

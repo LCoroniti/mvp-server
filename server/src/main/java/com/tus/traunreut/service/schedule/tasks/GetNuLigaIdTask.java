@@ -9,15 +9,16 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("4")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UpdateAllMatchesTask extends ScheduledTask {
-    public UpdateAllMatchesTask(LocalDateTime executionTime) {
+public class GetNuLigaIdTask extends ScheduledTask {
+    public GetNuLigaIdTask(LocalDateTime executionTime, String matchId) {
         super(executionTime);
+        setMatchId(matchId);
     }
 
     @Override
     public String getTaskName() {
-        return "Update all Matches";
+        return "Get NuLiga Match ID";
     }
 }

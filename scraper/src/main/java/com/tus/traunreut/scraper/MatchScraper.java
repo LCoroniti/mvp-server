@@ -2,6 +2,8 @@ package com.tus.traunreut.scraper;
 
 import com.tus.traunreut.AbstractScraper;
 import com.tus.traunreut.League;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,12 +16,9 @@ import java.util.List;
 import static com.tus.traunreut.Log.NETWORK;
 import static com.tus.traunreut.Log.NETWORK_LOG;
 
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class MatchScraper extends AbstractScraper<List<Element>> {
     private final League league;
-
-    public MatchScraper(League league) {
-        this.league = league;
-    }
 
     /**
      * Fetch all matches for the league which is represented in the url.

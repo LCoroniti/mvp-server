@@ -13,4 +13,12 @@ public interface ScheduledTaskRepository extends JpaRepository<ScheduledTask, Lo
 
     @Query("SELECT t FROM ScheduledTask t WHERE t.executionTime >= :pastLimit")
     List<ScheduledTask> findAllPendingTasks(@Param("pastLimit") LocalDateTime pastLimit);
+
+    /**
+     * Finds all ScheduledTask entities with the given matchId.
+     *
+     * @param matchId The match ID to search for.
+     * @return A list of ScheduledTask entities that match the given matchId.
+     */
+    List<ScheduledTask> findAllByMatchId(String matchId);
 }

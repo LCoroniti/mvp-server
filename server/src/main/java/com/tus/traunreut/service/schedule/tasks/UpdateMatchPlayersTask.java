@@ -12,7 +12,13 @@ import java.time.LocalDateTime;
 @DiscriminatorValue("2")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UpdateMatchPlayersTask extends ScheduledTask {
-    public UpdateMatchPlayersTask(LocalDateTime executionTime) {
+    public UpdateMatchPlayersTask(LocalDateTime executionTime, String matchId) {
         super(executionTime);
+        setMatchId(matchId);
+    }
+
+    @Override
+    public String getTaskName() {
+        return "Update Match Players";
     }
 }

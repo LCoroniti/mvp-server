@@ -9,4 +9,7 @@ dependencies {
     implementation project(':model')
     implementation project(':log')
     implementation project(':util')
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }

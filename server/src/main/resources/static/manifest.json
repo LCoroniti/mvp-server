@@ -1,8 +1,12 @@
 {
-  "short_name": "PotM",
-  "name": "Player of the Match",
+  "short_name": "TuS MVP",
+  "name": "TuS Traunreut Player of the Match",
   "icons": [
-    
+    {
+      "src": "tus.jpg",
+      "type": "image/jpg",
+      "sizes": "197x197"
+    }
   ],
   "start_url": ".",
   "display": "standalone",

@@ -1,17 +1,18 @@
 package com.tus.traunreut.service.schedule.executors.impl;
 
 import com.tus.traunreut.*;
+import com.tus.traunreut.events.MatchUpdateEvent;
 import com.tus.traunreut.repository.LeagueRepository;
 import com.tus.traunreut.repository.MatchRepository;
 import com.tus.traunreut.scraper.DataFetchException;
+import com.tus.traunreut.scraper.ScraperFactory;
 import com.tus.traunreut.service.MatchParsingService;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateAllMatchesTask;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,16 +22,17 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.tus.traunreut.Log.DATABASE;
 import static com.tus.traunreut.Log.DB_LOG;
 
 
 @Service
 @RequiredArgsConstructor
 public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<UpdateAllMatchesTask> {
-    private static final Logger databaseLogger = LoggerFactory.getLogger("DATABASE");
     private final MatchRepository matchRepository;
     private final LeagueRepository leagueRepository;
     private final MatchParsingService matchParsingService;
+    private final ApplicationEventPublisher eventPublisher;
     private final ScraperFactory scraperFactory;
 
     @Override
@@ -43,7 +45,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
             //for each league:
             List<String> leagues = leagueRepository.findDistinctLeagueNames();
             if (leagues == null || leagues.isEmpty()) {
-                databaseLogger.warn("No leagues found in the database. Cannot update matches.");
+                DB_LOG.warn(DATABASE, "No leagues found in the database. Cannot update matches.");
                 return;
             }
             for (String leagueName : leagues) {
@@ -61,13 +63,13 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 if (matches != null && !matches.isEmpty()) {
                     syncMatchesFromScraper(matches, league.getId());
                 } else {
-                    databaseLogger.warn("No matches found for league: {}", leagueName);
+                    DB_LOG.warn(DATABASE, "No matches found for league: {}", leagueName);
                 }
 
             }
-            databaseLogger.info("UpdateAllMatchesTask executed successfully.");
+            DB_LOG.info(DATABASE, "UpdateAllMatchesTask executed successfully.");
         } catch (DataFetchException e) {
-            databaseLogger.error("Error occurred while executing UpdateAllMatchesTask: ", e);
+            DB_LOG.error(DATABASE, "Error occurred while executing UpdateAllMatchesTask: ", e);
         }
     }
 
@@ -117,6 +119,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 if (updated) {
                     matchRepository.save(dbMatch);
                     DB_LOG.info(Log.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
+                    eventPublisher.publishEvent(new MatchUpdateEvent(this, dbMatch));
                 }
 
                 scrapedMap.remove(key);
@@ -132,6 +135,7 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
         // Step 4: Insert new matches that weren't in DB
         for (Match newMatch : scrapedMap.values()) {
             matchRepository.save(newMatch);
+            eventPublisher.publishEvent(new MatchUpdateEvent(this, newMatch));
         }
     }
 
