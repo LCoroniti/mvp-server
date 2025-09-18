@@ -1,4 +1,4 @@
-rootProject.name = 'webserver'
+rootProject.name = 'mvp-server'
 
 include 'model'
 include 'scraper'

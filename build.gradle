@@ -46,6 +46,6 @@ configure(subprojects.findAll { it.name.endsWith('server') }) {
     }
     bootJar {
         enabled = true
+        mainClass = 'com.tus.traunreut.server.WebserverApplication'
     }
-
 }
