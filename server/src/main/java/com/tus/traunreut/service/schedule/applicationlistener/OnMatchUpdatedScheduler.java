@@ -24,11 +24,14 @@ public class OnMatchUpdatedScheduler {
         schedulingService.cancelAllTasksForMatch(match);
 
         LocalDateTime matchDate = match.getMatchDate();
+        if (matchDate.isBefore(LocalDateTime.now())) {
+            return;
+        }
         String matchId = match.getId().toString();
 
         GetNuLigaIdTask getNuLigaIdTask = new GetNuLigaIdTask(matchDate.minusMinutes(5), matchId);
         UpdateMatchPlayersTask updateMatchPlayersTask = new UpdateMatchPlayersTask(matchDate, matchId);
-        UpdateAllMatchesTask updateAllMatchesTask = new UpdateAllMatchesTask(matchDate.plusHours(2));
+        UpdateAllMatchesTask updateAllMatchesTask = new UpdateAllMatchesTask(matchDate.plusHours(2), matchId);
         schedulingService.addTasks(List.of(getNuLigaIdTask, updateMatchPlayersTask, updateAllMatchesTask));
     }
 }

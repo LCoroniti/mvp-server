@@ -91,12 +91,14 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 Match scraped = scrapedMap.get(key);
 
                 boolean updated = false;
+                boolean timeUpdate = false;
 
                 // Update only changed fields
                 if (!Objects.equals(dbMatch.getMatchDate(), scraped.getMatchDate())) {
                     DB_LOG.info(Log.DATABASE, "Match date for match {} changed from {} to {}", dbMatch.getId(), DateTimeUtil.formatDate(dbMatch.getMatchDate()), DateTimeUtil.formatDate(scraped.getMatchDate()));
                     dbMatch.setMatchDate(scraped.getMatchDate());
                     updated = true;
+                    timeUpdate = true;
                 }
                 if (!Objects.equals(dbMatch.getHomeGoals(), scraped.getHomeGoals())) {
                     DB_LOG.info(Log.DATABASE, "Home goals for match {} changed from {} to {}", dbMatch.getId(),
@@ -115,10 +117,18 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                     dbMatch.setHasReport(scraped.isHasReport());
                     updated = true;
                 }
+                if (!Objects.equals(dbMatch.getNuligaMatchId(), scraped.getNuligaMatchId())) {
+                    DB_LOG.info(Log.DATABASE, "NuligaMatchId changed for match {} from {} to {}", dbMatch.getId(), dbMatch.getNuligaMatchId(), scraped.getNuligaMatchId());
+                    dbMatch.setNuligaMatchId(scraped.getNuligaMatchId());
+                    updated = true;
+                }
 
                 if (updated) {
                     matchRepository.save(dbMatch);
                     DB_LOG.info(Log.DATABASE, "Updated match in DB: id={}", dbMatch.getId());
+                }
+
+                if (timeUpdate) {
                     eventPublisher.publishEvent(new MatchUpdateEvent(this, dbMatch));
                 }
 

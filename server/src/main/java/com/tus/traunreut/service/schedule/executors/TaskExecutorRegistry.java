@@ -4,6 +4,7 @@ import com.tus.traunreut.ScheduledTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ClassUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ public class TaskExecutorRegistry {
 
     @SuppressWarnings("unchecked")
     public <T extends ScheduledTask> ScheduledTaskExecutor<T> getExecutor(T task) {
-        return (ScheduledTaskExecutor<T>) executors.get(task.getClass());
+        Class<?> taskClass = ClassUtils.getUserClass(task);
+        return (ScheduledTaskExecutor<T>) executors.get(taskClass);
     }
 }
