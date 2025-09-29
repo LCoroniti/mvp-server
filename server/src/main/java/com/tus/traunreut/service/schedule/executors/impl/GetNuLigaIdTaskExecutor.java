@@ -9,14 +9,16 @@ import com.tus.traunreut.service.MatchService;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.GetNuLigaIdTask;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 import static com.tus.traunreut.Log.INTERNAL;
 import static com.tus.traunreut.Log.INTERNAL_LOG;
 
+@Service
 @RequiredArgsConstructor
-public class GetNuLigaTaskExecutor implements ScheduledTaskExecutor<GetNuLigaIdTask> {
+public class GetNuLigaIdTaskExecutor implements ScheduledTaskExecutor<GetNuLigaIdTask> {
     private final ScraperFactory scraperFactory;
     private final MatchService matchService;
 
