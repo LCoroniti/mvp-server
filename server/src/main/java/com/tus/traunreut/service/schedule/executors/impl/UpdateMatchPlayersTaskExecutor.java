@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tus.traunreut.Log.DATABASE;
 import static com.tus.traunreut.Log.DB_LOG;
 
 
@@ -36,6 +37,7 @@ public class UpdateMatchPlayersTaskExecutor implements ScheduledTaskExecutor<Upd
             IScraper<List<MatchPlayer>> matchPlayerScraper = scraperFactory.createMatchPlayerScraper(match);
             List<MatchPlayer> players = matchPlayerScraper.fetchData();
             if (players != null && !players.isEmpty()) {
+                players.forEach(p -> DB_LOG.info(DATABASE, "Create or update player: %s".formatted(p.getPlayer().toString())));
                 for (MatchPlayer player : players) {
                     Player persistedPlayer = playerService.createIfNotExist(player.getPlayer().getFirstName(), player.getPlayer().getSurname(), player.getPlayer().getTeam());
                     player.setPlayer(persistedPlayer);

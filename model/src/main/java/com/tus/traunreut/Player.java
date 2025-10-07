@@ -38,6 +38,17 @@ public class Player {
     }
 
     @Override
+    public String toString() {
+        String teamString = team != null ? team.toString() : "null";
+        return "Player{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", surname='" + surname + '\'' +
+                ", team=" + teamString +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(firstName, surname, team);
     }
