@@ -1,12 +1,10 @@
 package com.tus.traunreut.service.schedule.executors.impl;
 
-import com.tus.traunreut.IScraper;
-import com.tus.traunreut.Log;
-import com.tus.traunreut.Match;
-import com.tus.traunreut.MatchPlayer;
+import com.tus.traunreut.*;
 import com.tus.traunreut.repository.MatchPlayerRepository;
 import com.tus.traunreut.repository.MatchRepository;
 import com.tus.traunreut.scraper.ScraperFactory;
+import com.tus.traunreut.service.PlayerService;
 import com.tus.traunreut.service.schedule.executors.ScheduledTaskExecutor;
 import com.tus.traunreut.service.schedule.tasks.UpdateMatchPlayersTask;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +20,27 @@ import static com.tus.traunreut.Log.DB_LOG;
 @RequiredArgsConstructor
 public class UpdateMatchPlayersTaskExecutor implements ScheduledTaskExecutor<UpdateMatchPlayersTask> {
     private final MatchPlayerRepository matchPlayerRepository;
+    private final PlayerService playerService;
     private final MatchRepository matchRepository;
     private final ScraperFactory scraperFactory;
 
     @Override
     public void execute(UpdateMatchPlayersTask task) {
         try {
-            Optional<Match> match = matchRepository.findById(Long.valueOf(task.getMatchId()));
-            if (match.isEmpty()) {
+            Optional<Match> optMatch = matchRepository.findById(Long.valueOf(task.getMatchId()));
+            if (optMatch.isEmpty()) {
                 DB_LOG.error(Log.DATABASE, "Cannot find match with ID {}", task.getMatchId());
                 return;
             }
-            IScraper<List<MatchPlayer>> matchPlayerScraper = scraperFactory.createMatchPlayerScraper(match.get());
+            Match match = optMatch.get();
+            IScraper<List<MatchPlayer>> matchPlayerScraper = scraperFactory.createMatchPlayerScraper(match);
             List<MatchPlayer> players = matchPlayerScraper.fetchData();
             if (players != null && !players.isEmpty()) {
+                for (MatchPlayer player : players) {
+                    Player persistedPlayer = playerService.createIfNotExist(player.getPlayer().getFirstName(), player.getPlayer().getSurname(), player.getPlayer().getTeam());
+                    player.setPlayer(persistedPlayer);
+                    player.setId(new MatchPlayerId(match.getId(), persistedPlayer.getId()));
+                }
                 matchPlayerRepository.saveAll(players);
                 DB_LOG.info(Log.DATABASE, "UpdateMatchPlayersTask executed successfully.");
             } else {
