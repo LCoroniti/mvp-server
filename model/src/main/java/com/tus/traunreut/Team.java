@@ -48,4 +48,15 @@ public class Team {
     public int hashCode() {
         return Objects.hash(name, club, gender, league);
     }
+
+    @Override
+    public String toString() {
+        return "Team{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", club=" + club +
+                ", gender=" + gender +
+                ", league=" + league +
+                '}';
+    }
 }
