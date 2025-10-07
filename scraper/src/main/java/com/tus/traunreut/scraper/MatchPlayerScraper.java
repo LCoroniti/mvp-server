@@ -48,7 +48,6 @@ public class MatchPlayerScraper extends AbstractScraper<List<MatchPlayer>> {
             matchPlayer.setMatch(match);
             matchPlayer.setPlayer(player);
             matchPlayer.setJerseyNumber(jerseyNbr);
-            matchPlayer.setId(new MatchPlayerId(match.getId(), player.getId()));
             result.add(matchPlayer);
         }
         return result;
