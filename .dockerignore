@@ -1,0 +1,8 @@
+.git
+.gradle
+.idea
+build
+*/build
+log/*.log
+docker-compose.yml
+testdata.sql

@@ -38,9 +38,10 @@ außer dem Paketnamen und dem Frontend-Branding.
 - `GET /api/scheduler` – geplante Tasks (Admin)
 - Alle übrigen Pfade werden auf die React-SPA (`index.html`) weitergeleitet.
 
-**Achtung:** Es gibt derzeit **keine Authentifizierung** – auch die schreibenden
-Admin-Endpoints sind offen. Vor einem öffentlichen Betrieb sollte mindestens der
-Admin-Bereich (z. B. mit Spring Security + Basic Auth) abgesichert werden.
+Der Admin-Bereich (`/admin/*`), `/api/scheduler` und alle schreibenden Endpoints
+sind per HTTP Basic Auth geschützt (`SecurityConfig`): Beim Aufruf einer Admin-Seite
+fragt der Browser nach Benutzername/Passwort (`ADMIN_USERNAME`/`ADMIN_PASSWORD`).
+Voting und alle Lese-Endpoints sind öffentlich.
 
 ## Konfiguration
 
@@ -54,6 +55,7 @@ Umgebungsvariablen:
 | `TUS_HEROKU_PASSWORD` | DB-Passwort |
 | `PORT` | HTTP-Port (Default 8080, wird von Heroku gesetzt) |
 | `APP_CORS_ALLOWEDORIGINS` | Erlaubte CORS-Origins (Default `http://localhost:3000`, nur für lokale Frontend-Entwicklung nötig) |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Login für den Admin-Bereich (`/admin/*`, `/api/scheduler`, alle schreibenden Endpoints). Lokaler Default: admin/admin — **in Produktion zwingend setzen!** |
 
 Das Profil `prod` (in den Properties aktiv) startet den Scraping-Scheduler. Für lokale
 Läufe ohne Scraping `SPRING_PROFILES_ACTIVE=default` setzen.
