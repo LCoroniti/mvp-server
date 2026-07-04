@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoSuchElement(NoSuchElementException ex) {
         return ResponseEntity.status(404).body(ex.getMessage() != null ? ex.getMessage() : "Resource not found");
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage() != null ? ex.getMessage() : "Invalid request");
+    }
 }

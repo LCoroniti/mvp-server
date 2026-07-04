@@ -102,13 +102,13 @@ public class UpdateAllMatchesTaskExecutor implements ScheduledTaskExecutor<Updat
                 }
                 if (!Objects.equals(dbMatch.getHomeGoals(), scraped.getHomeGoals())) {
                     DB_LOG.info(Log.DATABASE, "Home goals for match {} changed from {} to {}", dbMatch.getId(),
-                            Objects.requireNonNullElse(dbMatch.getHomeGoals(), 0), Objects.requireNonNullElse(dbMatch.getGuestGoals(), 0));
+                            Objects.requireNonNullElse(dbMatch.getHomeGoals(), 0), Objects.requireNonNullElse(scraped.getHomeGoals(), 0));
                     dbMatch.setHomeGoals(scraped.getHomeGoals());
                     updated = true;
                 }
                 if (!Objects.equals(dbMatch.getGuestGoals(), scraped.getGuestGoals())) {
                     DB_LOG.info(Log.DATABASE, "Guest goals for match {} changed from {} to {}", dbMatch.getId(),
-                            Objects.requireNonNullElse(scraped.getHomeGoals(), 0), Objects.requireNonNullElse(scraped.getGuestGoals(), 0));
+                            Objects.requireNonNullElse(dbMatch.getGuestGoals(), 0), Objects.requireNonNullElse(scraped.getGuestGoals(), 0));
                     dbMatch.setGuestGoals(scraped.getGuestGoals());
                     updated = true;
                 }

@@ -74,12 +74,3 @@ spring-boot-loader/
 # Gradle wrapper
 gradle/wrapper/gradle-wrapper.jar
 
-# Configuration files
-*.properties
-*.yml
-*.yaml
-
-# Docker
-docker-compose.yml
-Dockerfile
-.dockerignore

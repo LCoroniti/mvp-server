@@ -33,7 +33,7 @@ public class LeagueService {
         existingEntry.setSeason(updatedLeague.getSeason());
         existingEntry.setLeaguePlanUrl(updatedLeague.getLeaguePlanUrl());
 
-        return leagueRepository.save(updatedLeague);
+        return leagueRepository.save(existingEntry);
     }
 
     public League createLeague(League league) {

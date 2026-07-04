@@ -1,0 +1,22 @@
+# Lokale PostgreSQL-Datenbank für Entwicklung und Tests.
+# Start:  docker compose up -d
+# Stop:   docker compose down          (Daten bleiben erhalten)
+# Reset:  docker compose down -v       (löscht auch die Daten)
+#
+# Die Zugangsdaten entsprechen den Defaults in server/src/main/resources/application.properties,
+# d.h. der Server findet diese Datenbank ohne weitere Konfiguration.
+services:
+  db:
+    image: postgres:16
+    container_name: mvp-postgres
+    environment:
+      POSTGRES_DB: mvp
+      POSTGRES_USER: mvp
+      POSTGRES_PASSWORD: mvp
+    ports:
+      - "5432:5432"
+    volumes:
+      - mvp-pgdata:/var/lib/postgresql/data
+
+volumes:
+  mvp-pgdata:
